@@ -1,0 +1,101 @@
+### Create a new author
+POST http://localhost:3000/author-api/author
+Content-Type: application/json
+
+{
+  "role": "author",
+  "firstName": "author1",
+  "lastName": "author1",
+  "email": "author1@mail.com",
+  "profileImageUrl": "author image",
+  "isActive": true
+}
+
+### Create a new user
+POST http://localhost:3000/user-api/user
+Content-Type: application/json
+
+{
+  "role": "user",
+  "firstName": "user1",
+  "lastName": "user1",
+  "email": "user1@mail.com",
+  "profileImageUrl": "user1 image",
+  "isActive": true
+}
+
+### Post a new article
+POST http://localhost:3000/author-api/article
+Content-Type: application/json
+
+{
+    "authorData":{
+        "nameOfAuthor":"author1",
+        "email":"author1@mail.com",
+        "profileImageUrl":"author1 image"
+    },
+    "articleId":"{{$timestamp}}",
+    "title":"Fundamentals of JavaScript",
+    "category":"test",
+    "content":"JavaScript is a versatile programming language widely used for web development...",
+    "dateOfCreation":"{{$datetime iso8601}}",
+    "dateOfModification":"{{$datetime iso8601}}",
+    "isArticleActive":true,
+    "comments":[]
+}
+
+### Retrieve all articles available to users
+GET http://localhost:3000/user-api/articles
+
+### Retrieve all articles published by authors
+GET http://localhost:3000/author-api/articles
+
+### Edit an existing article by its ID
+PUT http://localhost:3000/author-api/article/1738331074
+Content-Type: application/json
+
+{
+    "_id": "679b92f0a4cdd3788fc1a2ff",
+    "authorData":{
+        "nameOfAuthor":"",
+        "email":"",
+        "profileImageUrl":""
+    },
+    "articleId":"{{$timestamp}}",
+    "title":"Fundamentals of JS",
+    "category":"programming",
+    "content":"Updated content about JavaScript with new insights...",
+    "dateOfModification":"{{$datetime iso8601}}",
+    "isArticleActive":true,
+    "comments":[]
+}
+
+### Add a comment to an article by its ID
+PUT http://localhost:3000/user-api/comment/1740158465
+Content-Type: application/json
+
+{
+      "nameOfUser": "user1",
+      "comment": "This is an insightful article!"
+}
+
+### Soft delete an article by its ID (mark as inactive)
+PUT http://localhost:3000/author-api/articles/1738331074
+Content-Type: application/json
+
+{
+     "_id": "67b8b5f12a28190079492f1e",
+    "authorData":{
+        "nameOfAuthor":"",
+        "email":"",
+        "profileImageUrl":""
+    },
+    "articleId":"{{$timestamp}}",
+    "title":"Fundamentals of JS",
+    "category":"programming",
+    "content":"Updated JavaScript fundamentals with additional best practices...",
+    "dateOfCreation":"{{$datetime iso8601}}",
+    "dateOfModification":"{{$datetime iso8601}}",
+    "isArticleActive":false,
+    "comments":[]
+}

@@ -1,0 +1,446 @@
+/* Home.css */
+
+/* Main Container */
+.home-container {
+  /* min-height: 20vh; */
+  background-color: var(--bg);
+  color: var(--light);
+}
+
+.welcome-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding: 4rem 1rem;
+  margin-bottom: 4rem;
+}
+
+.hero-section h1 {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.gradient-text {
+  color: var(--text-pink);
+}
+
+.hero-section p {
+  font-size: 1.25rem;
+  color: var(--light);
+  opacity: 0.8;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.cta-button {
+  text-decoration: none;
+  background-color: var(--text-pink);
+  color: var(--light);
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  background-color: var(--bg-pink);
+}
+
+/* Statistics Section */
+.stats-section {
+  margin: 4rem 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.stat-card {
+  background-color: var(--dark);
+  border: 1px solid var(--bg);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  color: var(--text-pink);
+  margin-bottom: 1rem;
+}
+
+.stat-card h3 {
+  color: var(--light);
+  margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+  color: var(--bg-pink);
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+/* Features Section */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+  /* padding: 2rem;    */
+  max-width: 1200px;
+  margin: 4rem 0;
+}
+
+.feature-card {
+  background: var(--dark);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: transform 0.2s ease-in-out;
+  border: 1px solid var(--bg);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.icon-wrapper {
+  background: var(--bg);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.feature-icon {
+  color: var(--text-pink);
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.feature-card h3 {
+  color: var(--light);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Tech Stack Section */
+.tech-section {
+  margin: 4rem 0;
+  text-align: center;
+  background-color: var(--dark);
+  border: 1px solid var(--bg);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+}
+
+.tech-section h2 {
+  margin-bottom: 3rem;
+  color: var(--light);
+}
+
+.tech-stack {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.tech-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tech-item svg {
+  font-size: 2.5rem;
+  color: var(--text-pink);
+  transition: transform 0.2s;
+}
+
+.tech-item:hover svg {
+  transform: scale(1.1);
+}
+
+.tech-item span {
+  color: var(--light);
+  opacity: 0.8;
+}
+
+/* Contact Section */
+.contact-section {
+  margin: 4rem 0;
+  text-align: center;
+}
+
+.contact-section h2 {
+  margin-bottom: 2rem;
+  color: var(--light);
+}
+
+.contact-button {
+  background-color: var(--dark);
+  color: var(--light);
+  padding: 1rem 2rem;
+  border: 1px solid var(--bg);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.contact-button:hover {
+  background-color: var(--bg);
+}
+
+.contact-button.copied {
+  color: var(--text-pink);
+}
+
+.copied-badge {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--text-pink);
+  color: var(--light);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/* User Section Styles */
+
+.user-section {
+  /* padding: 20px; */
+  /* margin-top: 2rem; */
+  background-color: var(--bg);
+  border-radius: 12px;
+  max-width: 500px;
+  margin: 5rem auto;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.profile-card {
+  background-color: var(--dark);
+  border-radius: 10px;
+  padding: 24px;
+  color: var(--light);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bg-pink);
+}
+
+.profile-info {
+  margin-left: 16px;
+}
+
+.profile-info h2 {
+  color: var(--light);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.email {
+  color: var(--light);
+  opacity: 0.7;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.role-selection h3 {
+  color: var(--text-pink);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.role-options {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.role-card {
+  flex: 1;
+  position: relative;
+}
+
+.role-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.role-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.role-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  color: var(--light);
+}
+
+.role-label span {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.role-input:checked + .role-label {
+  border-color: var(--bg-pink);
+  background-color: rgba(246, 115, 115, 0.1);
+}
+
+.role-input:focus + .role-label {
+  box-shadow: 0 0 0 3px rgba(246, 115, 115, 0.3);
+}
+
+.role-label:hover {
+  transform: translateY(-4px);
+  border-color: var(--text-pink);
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #f8d7da;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+/* Responsive styles */
+@media (max-width: 576px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-info {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+  
+  .role-options {
+    flex-direction: column;
+  }
+}
+
+
+/* Responsive styles */
+@media (max-width: 576px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-info {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+  
+  .role-options {
+    flex-direction: column;
+  }
+}
+/* Media Queries */
+@media (max-width: 768px) {
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-section p {
+    font-size: 1.1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tech-stack {
+    gap: 2rem;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .role-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-section,
+.stats-section,
+.features-section,
+.tech-section,
+.contact-section {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+

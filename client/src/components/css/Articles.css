@@ -1,0 +1,316 @@
+.dark-container {
+    min-height: 90vh;
+    /* padding: 2rem 0; */
+}
+
+.cards-grid {
+    width: 100%;
+    padding-right: var(--bs-gutter-x, 0.75rem);
+    padding-left: var(--bs-gutter-x, 0.75rem);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Match Bootstrap's container max-widths */
+@media (min-width: 576px) {
+    .cards-grid {
+        max-width: 540px;
+    }
+}
+@media (min-width: 768px) {
+    .cards-grid {
+        max-width: 720px;
+    }
+}
+@media (min-width: 992px) {
+    .cards-grid {
+        max-width: 960px;
+    }
+}
+@media (min-width: 1200px) {
+    .cards-grid {
+        max-width: 1140px;
+    }
+}
+@media (min-width: 1400px) {
+    .cards-grid {
+        max-width: 1320px;
+    }
+}
+
+.article-card {
+    background: #202127;
+    border-radius: 12px;
+    height: 100%;
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+.article-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+}
+
+.top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.author-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.author-name {
+    color: #a0a0a0;
+    font-size: 0.9rem;
+}
+
+.category-tag {
+    background-color: #313235;
+    color: var(--text-pink);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.article-title {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.article-excerpt {
+    color: #8D8D95;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    flex-grow: 1;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.date-info {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.read-button {
+    padding: 0.5rem 1rem;
+    background: #313235;
+    color: var(--text-pink);
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100px;
+    text-align: center;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.read-button:hover {
+    background-color: var(--text-pink);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.error-message {
+    background: rgba(220, 38, 38, 0.1);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #121214;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
+}
+
+/* Filter section styles - REVISED */
+.filter-section {
+    width: 100%;
+    padding-right: var(--bs-gutter-x, 0.75rem);
+    padding-left: var(--bs-gutter-x, 0.75rem);
+    margin-right: auto;
+    margin-left: auto;
+    margin-bottom: 2rem;
+}
+
+.filter-section .d-flex {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+}
+
+.search-box {
+    flex: 2;
+    min-width: 200px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: #313235;
+    color: #ffffff;
+}
+
+.search-box input::placeholder {
+    color: #8D8D95;
+}
+
+.filter-dropdown {
+    flex: 1;
+    min-width: 150px;
+}
+
+.filter-dropdown select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: #313235;
+    color: #ffffff;
+    cursor: pointer;
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238D8D95' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+}
+
+.add-article-button {
+    padding: 0.75rem 1.5rem;
+    background: #313235;
+    color: var(--text-pink);
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    height: 100%;
+    align-self: stretch;
+}
+
+.add-article-button:hover {
+    background-color: var(--text-pink);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .dark-container {
+        padding: 1rem 0;
+    }
+    
+    .filter-section .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .search-box,
+    .filter-dropdown {
+        width: 100%;
+        min-width: 100%;
+    }
+    
+    .add-article-button {
+        width: 100%;
+    }
+    
+    .card-content {
+        padding: 1rem;
+    }
+    
+    .article-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (min-width: 576px) {
+    .filter-section {
+        max-width: 540px;
+    }
+}
+@media (min-width: 768px) {
+    .filter-section {
+        max-width: 720px;
+    }
+}
+@media (min-width: 992px) {
+    .filter-section {
+        max-width: 960px;
+    }
+}
+@media (min-width: 1200px) {
+    .filter-section {
+        max-width: 1140px;
+    }
+}
+@media (min-width: 1400px) {
+    .filter-section {
+        max-width: 1320px;
+    }
+}

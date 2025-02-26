@@ -1,0 +1,62 @@
+.author-profile {
+  min-height: 100vh;
+  /* padding: 0.5rem 0; */
+}
+
+.back-nav {
+  width: 100%;
+  padding-right: var(--bs-gutter-x, 0.75rem);
+  padding-left: var(--bs-gutter-x, 0.75rem);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.back-button {
+  padding: 0.75rem 1rem;
+  background: #313235;
+  color: var(--text-pink);
+  margin-bottom: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.back-button i{
+  margin-right: 8px;
+}
+
+.back-button:hover {
+  background-color: var(--text-pink);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Match Bootstrap's container max-widths */
+@media (min-width: 576px) {
+  .back-nav {
+      max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .back-nav {
+      max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .back-nav {
+      max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .back-nav {
+      max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .back-nav {
+      max-width: 1320px;
+  }
+}

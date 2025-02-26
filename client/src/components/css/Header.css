@@ -1,0 +1,111 @@
+.custom-nav {
+  background-color: #1a1b1e;
+  padding: 1rem 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-logo {
+  font-size: 2rem;
+  color: #F56565;
+}
+
+.brand-text {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #EBEBF5;
+}
+
+.navbar-nav .nav-link {
+  color: #EBEBF5 !important; /* Override Bootstrap default */
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #F56565 !important;
+}
+
+.navbar-nav .nav-link.active {
+  color: #F56565 !important;
+}
+
+.user-info {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.user-role {
+  color: #F56565;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.user-name {
+  color: #EBEBF5;
+  font-weight: 500;
+}
+
+.sign-out-btn {
+  background-color: transparent;
+  border: 1px solid #F56565;
+  color: #F56565;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.sign-out-btn:hover {
+  background-color: #F56565;
+  color: white;
+}
+
+/* Fixed Responsive styles */
+@media (max-width: 576px) {
+  .navbar-collapse {
+    background-color: #1a1b1e;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 8px;
+  }
+
+  .nav-item {
+    margin: 0.5rem 0;
+  }
+
+  .user-info {
+    margin: 0.5rem 0;
+  }
+}
+
+/* Fixed navbar toggler styles */
+.navbar-toggler {
+  border: 1px solid rgba(235, 235, 245, 0.2);
+  padding: 0.25rem 0.75rem;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+/* Fixed toggler icon */
+.navbar-dark .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(235, 235, 245, 0.8)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+/* Ensure collapsed menu appears properly */
+.navbar-collapse.show,
+.navbar-collapse.collapsing {
+  background-color: #1a1b1e;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+/* Add transition for smooth collapse */
+.navbar-collapse {
+  transition: all 0.3s ease;
+}
