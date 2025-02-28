@@ -50,13 +50,13 @@ function AdminProfile() {
         
         // Fetch all users and authors
         const usersResponse = await axios.get(
-          `https://draft-blogapp.vercel.app/admin-api/users`,
+          `https://draft-blogapp.onrender.com/admin-api/users`,
           config
         );
         
         // Fetch dashboard stats
         const dashboardResponse = await axios.get(
-          `https://draft-blogapp.vercel.app/admin-api/dashboard`,
+          `https://draft-blogapp.onrender.com/admin-api/dashboard`,
           config
         );
         

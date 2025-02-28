@@ -29,7 +29,7 @@ function ArticleByID() {
     articleAfterChanges.dateOfModification = `${currentDate.getDate()}-${currentDate.getMonth()}-${currentDate.getFullYear()}`;
 
     let res = await axios.put(
-      `https://draft-blogapp.vercel.app/author-api/article/${articleAfterChanges.articleId}`,
+      `https://draft-blogapp.onrender.com/article/${articleAfterChanges.articleId}`,
       articleAfterChanges,
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -45,7 +45,7 @@ function ArticleByID() {
   async function addComment(commentObj) {
     commentObj.nameOfUser = currentUser.firstName;
     let res = await axios.put(
-      `https://draft-blogapp.vercel.app/user-api/comment/${currentArticle.articleId}`,
+      `https://draft-blogapp.onrender.com/user-api/comment/${currentArticle.articleId}`,
       commentObj
     );
     if (res.data.message === "comment added") {
@@ -56,7 +56,7 @@ function ArticleByID() {
   async function deleteArticle() {
     state.isArticleActive = false;
     let res = await axios.put(
-      `https://draft-blogapp.vercel.app/author-api/articles/${state.articleId}`,
+      `https://draft-blogapp.onrender.com/author-api/articles/${state.articleId}`,
       state
     );
     if (res.data.message === "article deleted or restored") {
@@ -67,7 +67,7 @@ function ArticleByID() {
   async function restoreArticle() {
     state.isArticleActive = true;
     let res = await axios.put(
-      `https://draft-blogapp.vercel.app/author-api/articles/${state.articleId}`,
+      `https://draft-blogapp.onrender.com/author-api/articles/${state.articleId}`,
       state
     );
     if (res.data.message === "article deleted or restored") {

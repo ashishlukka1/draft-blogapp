@@ -41,7 +41,7 @@ function Home() {
     try {
       if (selectedRole === "author") {
         res = await axios.post(
-          "https://vercel.com/srikars-projects-bc9421a9/inkspire/GMQtgQxd8DRTLQnr8PARKjJs2Dhk/author-api/author",
+          "https://draft-blogapp.onrender.com/author-api/author",
           currentUser
         );
         let { message, payload } = res.data;
@@ -54,7 +54,7 @@ function Home() {
       }
       else if (selectedRole === "user") {
         res = await axios.post(
-          `https://vercel.com/srikars-projects-bc9421a9/inkspire/GMQtgQxd8DRTLQnr8PARKjJs2Dhk/user-api/user`,
+          `https://draft-blogapp.onrender.com/user-api/user`,
           currentUser
         );
         let { message, payload } = res.data;
@@ -67,7 +67,7 @@ function Home() {
       }
       else if (selectedRole === "admin") {
         res = await axios.post(
-          `https://vercel.com/srikars-projects-bc9421a9/inkspire/GMQtgQxd8DRTLQnr8PARKjJs2Dhk/admin-api/admin`,
+          `https://draft-blogapp.onrender.com/admin-api/admin`,
           currentUser
         );
         let { message, payload } = res.data;
