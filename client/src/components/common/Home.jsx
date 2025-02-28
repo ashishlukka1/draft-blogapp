@@ -41,7 +41,7 @@ function Home() {
     try {
       if (selectedRole === "author") {
         res = await axios.post(
-          "${import.meta.env.local.URL}/author-api/author",
+          "https://draft-blogapp.vercel.app/author-api/author",
           currentUser
         );
         let { message, payload } = res.data;
@@ -54,7 +54,7 @@ function Home() {
       }
       else if (selectedRole === "user") {
         res = await axios.post(
-          `${import.meta.env.local.URL}/user-api/user`,
+          `https://draft-blogapp.vercel.app/user-api/user`,
           currentUser
         );
         let { message, payload } = res.data;
@@ -67,7 +67,7 @@ function Home() {
       }
       else if (selectedRole === "admin") {
         res = await axios.post(
-          `${import.meta.env.local.URL}/admin-api/admin`,
+          `https://draft-blogapp.vercel.app/admin-api/admin`,
           currentUser
         );
         let { message, payload } = res.data;

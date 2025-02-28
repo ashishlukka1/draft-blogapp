@@ -50,13 +50,13 @@ function AdminProfile() {
         
         // Fetch all users and authors
         const usersResponse = await axios.get(
-          `${import.meta.env.local.URL}/admin-api/users`,
+          `https://draft-blogapp.vercel.app/admin-api/users`,
           config
         );
         
         // Fetch dashboard stats
         const dashboardResponse = await axios.get(
-          `${import.meta.env.local.URL}/admin-api/dashboard`,
+          `https://draft-blogapp.vercel.app/admin-api/dashboard`,
           config
         );
         
@@ -118,7 +118,7 @@ function AdminProfile() {
       
       // Update user status
       await axios.put(
-        `${import.meta.env.local.URL}/users/${userId}/status`,
+        `https://draft-blogapp.vercel.app/users/${userId}/status`,
         { isActive: !currentStatus },
         config
       );
@@ -134,7 +134,7 @@ function AdminProfile() {
       
       // Refresh dashboard stats
       const dashboardResponse = await axios.get(
-        '${import.meta.env.local.URL}/admin-api/dashboard',
+        'https://draft-blogapp.vercel.app/admin-api/dashboard',
         config
       );
       

@@ -31,7 +31,7 @@ function PostArticle() {
     articleObj.comments = [];
     articleObj.isArticleActive = true;
 
-    let res = await axios.post('${import.meta.env.local.URL}/author-api/article', articleObj);
+    let res = await axios.post('https://draft-blogapp.vercel.app/author-api/article', articleObj);
     if (res.status === 201) {
       navigate(`/author-profile/${currentUser.email}/articles`);
     }
