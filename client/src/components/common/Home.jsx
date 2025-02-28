@@ -37,10 +37,11 @@ function Home() {
     setError("");
     const selectedRole = e.target.value;
     currentUser.role = selectedRole;
+    console.log(currentUser);
     let res = null;
     try {
       if (selectedRole === "author") {
-        console.log(currentUser);
+        
         res = await axios.post(
           
           "https://draft-blogapp.onrender.com/author-api/author",
