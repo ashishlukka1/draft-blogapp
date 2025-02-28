@@ -1,44 +1,53 @@
-# Draft - Blog App
+# Draft Blog App
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/YOUR_BADGE_ID/deploy-status)](https://draft-blogapp.netlify.app/)
+## Overview
+Draft is a full-featured blog application built with the MERN stack (MongoDB, Express, React, Node.js) that supports three user roles: admin, author, and regular user. The application uses Clerk for authentication and is deployed with Netlify (frontend) and Render (backend).
 
-## 📝 Overview
-Draft - Blog App is a full-stack blogging platform built using the **MERN stack**, featuring role-based access control for three user types:
+## Live Demo
+[Draft Blog App](https://draft-blogapp.netlify.app/)
 
-🔹 **Admin** - Manages users and blog posts.  
-🔹 **Author** - Creates, edits, and deletes their own blog posts.  
-🔹 **User** - Reads blog posts and interacts with authors.  
+## Features
 
-Authentication is handled using **Clerk**, ensuring secure access. The frontend is deployed on **Netlify**, and the backend is hosted on **Render**.
+### User Roles
+- **Admin**: Full access to manage all content, users, and site configuration
+- **Author**: Can create, edit, and delete their own blog posts
+- **User**: Can read posts, comment, like, and save favorites
 
----
+### Authentication
+- Secure authentication powered by Clerk
+- Role-based access control
+- Protected routes
 
-## 🛠 Tech Stack
-### Frontend:
+### Core Functionality
+- Create, read, update, and delete blog posts
+- Rich text editor for content creation
+- Comment system
+- Like and save functionality
+- User profiles
+- Search and filtering
+
+### Technical Details
+- **Frontend**: React.js with Bootstrap and custom CSS
+- **Backend**: Node.js with Express
+- **Database**: MongoDB
+- **Authentication**: Clerk
+- **Deployment**: 
+  - Frontend: Netlify
+  - Backend: Render
+
+## Responsive Design
+The application is fully responsive with a clean, modern UI that works seamlessly across desktop, tablet, and mobile devices.
+
+## Technologies Used
 - React.js
-- Bootstrap, CSS
-- Clerk Authentication
-
-### Backend:
 - Node.js
-- Express.js
+- Express
 - MongoDB
+- Clerk Authentication
+- Bootstrap
+- Custom CSS
+- Netlify
+- Render
 
-### Deployment:
-- **Frontend:** Netlify
-- **Backend:** Render
-
----
-
-## 🚀 Features
-✅ Secure authentication via **Clerk**  
-✅ Role-based access control (**Admin, Author, User**)  
-✅ CRUD operations for blog posts (**Authors**)  
-✅ User-friendly blog reading experience  
-✅ Responsive design with **Tailwind CSS**  
-
----
-
-## 🌐 Live Demo
-🔗 [Draft - Blog App](https://draft-blogapp.netlify.app/)
-
+## Contact
+For support or inquiries, please contact [ashishlukka2005@gmail.com]
