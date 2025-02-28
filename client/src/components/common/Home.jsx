@@ -40,7 +40,9 @@ function Home() {
     let res = null;
     try {
       if (selectedRole === "author") {
+        console.log(currentUser);
         res = await axios.post(
+          
           "https://draft-blogapp.onrender.com/author-api/author",
           currentUser
         );
