@@ -37,14 +37,14 @@ function Articles() {
           };
 
           // Try to verify as author first
-          let response = await axios.post('https://draft-blogapp.vercel.app/author-api/author', userData, {
+          let response = await axios.post('https://inkspire-ns9d6vbei-srikars-projects-bc9421a9.vercel.app/author-api/author', userData, {
             headers: { Authorization: `Bearer ${token}` }
           });
 
           // If not an author, try as user
           if (response.data.message === "Invalid role") {
             userData.role = 'user';
-            response = await axios.post('https://draft-blogapp.vercel.app/user-api/user', userData, {
+            response = await axios.post('https://inkspire-ns9d6vbei-srikars-projects-bc9421a9.vercel.app/user-api/user', userData, {
               headers: { Authorization: `Bearer ${token}` }
             });
           }

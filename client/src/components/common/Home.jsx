@@ -41,7 +41,7 @@ function Home() {
     try {
       if (selectedRole === "author") {
         res = await axios.post(
-          "https://draft-blogapp.vercel.app/author-api/author",
+          "https://vercel.com/srikars-projects-bc9421a9/inkspire/GMQtgQxd8DRTLQnr8PARKjJs2Dhk/author-api/author",
           currentUser
         );
         let { message, payload } = res.data;
@@ -54,7 +54,7 @@ function Home() {
       }
       else if (selectedRole === "user") {
         res = await axios.post(
-          `https://draft-blogapp.vercel.app/user-api/user`,
+          `https://vercel.com/srikars-projects-bc9421a9/inkspire/GMQtgQxd8DRTLQnr8PARKjJs2Dhk/user-api/user`,
           currentUser
         );
         let { message, payload } = res.data;
@@ -67,7 +67,7 @@ function Home() {
       }
       else if (selectedRole === "admin") {
         res = await axios.post(
-          `https://draft-blogapp.vercel.app/admin-api/admin`,
+          `https://vercel.com/srikars-projects-bc9421a9/inkspire/GMQtgQxd8DRTLQnr8PARKjJs2Dhk/admin-api/admin`,
           currentUser
         );
         let { message, payload } = res.data;
