@@ -98,7 +98,7 @@ function Home() {
         lastName: user.lastName,
         email: user.emailAddresses[0].emailAddress,
         profileImageUrl: user.imageUrl,
-        username: `${user.firstName} ${user.lastName}`
+        // username: `${user.firstName} ${user.lastName}`
       });
     }
   }, [isLoaded]);
