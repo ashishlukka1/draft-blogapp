@@ -19,9 +19,9 @@ mongoose
 
 
 // API routes
-app.use("/api/user", userApp);
-app.use("/api/author", authorApp);
-app.use("/api/admin", adminApp);
+app.use("/user-api", userApp);
+app.use("/author-api", authorApp);
+app.use("/admin-api", adminApp);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
@@ -29,5 +29,5 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
 });
 
-// Export the app for Vercel
+// Export the Express app for Vercel
 module.exports = app;
