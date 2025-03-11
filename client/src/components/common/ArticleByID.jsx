@@ -83,7 +83,7 @@ function ArticleByID() {
       articleAfterChanges.dateOfModification = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}`;
       
       const res = await axios.put(
-        `https://draft-blogapp.onrender.com/author-api/article/${articleAfterChanges.articleId}`,
+        `https://draft-backend.vercel.app/author-api/article/${articleAfterChanges.articleId}`,
         articleAfterChanges,
         { 
           headers: { 
@@ -120,7 +120,7 @@ function ArticleByID() {
       commentObj.nameOfUser = currentUser.firstName;
       
       let res = await axios.put(
-        `https://draft-blogapp.onrender.com/user-api/comment/${currentArticle.articleId}`,
+        `https://draft-backend.vercel.app/user-api/comment/${currentArticle.articleId}`,
         commentObj
       );
       
@@ -152,7 +152,7 @@ function ArticleByID() {
       };
       
       let res = await axios.put(
-        `https://draft-blogapp.onrender.com/author-api/article/${currentArticle.articleId}`,
+        `https://draft-backend.vercel.app/author-api/article/${currentArticle.articleId}`,
         articleToUpdate,
         { 
           headers: { 
@@ -186,7 +186,7 @@ function ArticleByID() {
       };
       
       let res = await axios.put(
-        `https://draft-blogapp.onrender.com/author-api/article/${currentArticle.articleId}`,
+        `https://draft-backend.vercel.app/author-api/article/${currentArticle.articleId}`,
         articleToUpdate,
         { 
           headers: { 

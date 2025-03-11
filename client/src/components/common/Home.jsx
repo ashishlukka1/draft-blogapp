@@ -44,7 +44,7 @@ function Home() {
         
         res = await axios.post(
           
-          "https://draft-blogapp.onrender.com/author-api/author",
+          "https://draft-backend.vercel.app/author-api/author",
           currentUser
         );
         let { message, payload } = res.data;
@@ -57,7 +57,7 @@ function Home() {
       }
       else if (selectedRole === "user") {
         res = await axios.post(
-          `https://draft-blogapp.onrender.com/user-api/user`,
+          `https://draft-backend.vercel.app/user-api/user`,
           currentUser
         );
         let { message, payload } = res.data;
@@ -70,7 +70,7 @@ function Home() {
       }
       else if (selectedRole === "admin") {
         res = await axios.post(
-          `https://draft-blogapp.onrender.com/admin-api/admin`,
+          `https://draft-backend.vercel.app/admin-api/admin`,
           currentUser
         );
         let { message, payload } = res.data;
