@@ -4,7 +4,7 @@
 Draft is a full-featured blog application built with the MERN stack (MongoDB, Express, React, Node.js) that supports three user roles: admin, author, and regular user. The application uses Clerk for authentication and is deployed with Netlify (frontend) and Render (backend).
 
 ## Live Demo
-[Draft Blog App](https://draft-blogapp.netlify.app/)
+[Draft Blog App](https://draft-blogapp.vercel.app/)
 
 ## Features
 
