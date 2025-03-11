@@ -33,3 +33,5 @@ app.use((err, req, res, next) => {
     console.log("Error encountered in Express error handler:", err);
     res.status(500).send({ message: err.message });
 });
+
+module.exports = app;
