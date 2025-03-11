@@ -24,9 +24,9 @@ mongoose.connect(process.env.DBURL)
 app.use(exp.json());
 
 // Register API routes
-app.use('/user-api', userApp);  // Routes for user-related operations
-app.use("/author-api", authorApp);  // Routes for author-related operations
-app.use('/admin-api', adminApp);  // Routes for admin-related operations
+app.use('/api/user', userApp);
+app.use('/api/author', authorApp);
+app.use('/api/admin', adminApp);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
