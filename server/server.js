@@ -17,7 +17,6 @@ mongoose
   .then(() => console.log("Database connection successful"))
   .catch((err) => console.log("Database connection failed: ", err));
 
-
 // API routes
 app.use("/user-api", userApp);
 app.use("/author-api", authorApp);
