@@ -1,39 +1,61 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { userAuthorContextObj } from '../../contexts/UserAuthorContext';
 import { useNavigate } from 'react-router-dom';
-import { FaPen } from 'react-icons/fa';
+import { FaPen, FaPlus } from 'react-icons/fa';
 import { LiaPenNibSolid, LiaLayerGroupSolid, LiaFileAltSolid } from "react-icons/lia";
 import '../css/PostArticle.css';
 
 function PostArticle() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const { currentUser } = useContext(userAuthorContextObj);
   const navigate = useNavigate();
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+
+  // Toggle custom category field when "Custom" option is selected
+  const handleCategoryChange = (e) => {
+    if (e.target.value === "custom") {
+      setShowCustomCategory(true);
+    } else {
+      setShowCustomCategory(false);
+    }
+  };
 
   async function postArticle(articleObj) {
-    const authorData = {
-      nameOfAuthor: currentUser.firstName,
-      email: currentUser.email,
-      profileImageUrl: currentUser.profileImageUrl
-    };
-    articleObj.authorData = authorData;
-    articleObj.articleId = Date.now();
+    try {
+      // If using custom category, replace the category value
+      if (articleObj.category === "custom" && articleObj.customCategory) {
+        articleObj.category = articleObj.customCategory;
+        delete articleObj.customCategory;
+      }
+      
+      const authorData = {
+        nameOfAuthor: currentUser.firstName,
+        email: currentUser.email,
+        profileImageUrl: currentUser.profileImageUrl
+      };
+      
+      articleObj.authorData = authorData;
+      articleObj.articleId = Date.now();
 
-    let currentDate = new Date();
-    articleObj.dateOfCreation = currentDate.getDate() + "-" +
-      currentDate.getMonth() + "-" +
-      currentDate.getFullYear() + " " +
-      currentDate.toLocaleTimeString("en-US", { hour12: true });
+      let currentDate = new Date();
+      articleObj.dateOfCreation = currentDate.getDate() + "-" +
+        currentDate.getMonth() + "-" +
+        currentDate.getFullYear() + " " +
+        currentDate.toLocaleTimeString("en-US", { hour12: true });
 
-    articleObj.dateOfModification = articleObj.dateOfCreation;
-    articleObj.comments = [];
-    articleObj.isArticleActive = true;
+      articleObj.dateOfModification = articleObj.dateOfCreation;
+      articleObj.comments = [];
+      articleObj.isArticleActive = true; // Fixed property name to match original code
 
-    let res = await axios.post('https://draft-backend.vercel.app/author-api/article', articleObj);
-    if (res.status === 201) {
-      navigate(`/author-profile/${currentUser.email}/articles`);
+      let res = await axios.post('https://draft-backend.vercel.app/author-api/article', articleObj);
+      if (res.status === 201) {
+        navigate(`/author-profile/${currentUser.email}/articles`);
+      }
+    } catch (error) {
+      console.error("Error posting article:", error);
+      // Handle error (you might want to add some error state and display it to the user)
     }
   }
 
@@ -59,7 +81,7 @@ function PostArticle() {
                       type="text"
                       className="custom-input"
                       placeholder="Enter article title"
-                      {...register("title")}
+                      {...register("title", { required: true })}
                     />
                   </div>
 
@@ -69,16 +91,35 @@ function PostArticle() {
                       <span>Category</span>
                     </label>
                     <select
-                      {...register("category")}
+                      {...register("category", { required: true })}
                       className="custom-select"
                       defaultValue=""
+                      onChange={handleCategoryChange}
                     >
                       <option value="" disabled>Select a category</option>
                       <option value="programming">Programming</option>
                       <option value="AI&ML">AI & Machine Learning</option>
                       <option value="database">Database</option>
+                      <option value="custom">Add Custom Category</option>
                     </select>
                   </div>
+
+                  {showCustomCategory && (
+                    <div className="form-group">
+                      <label className="form-label">
+                        <FaPlus className="input-icon" />
+                        <span>Custom Category</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="custom-input"
+                        placeholder="Enter custom category"
+                        {...register("customCategory", { 
+                          required: showCustomCategory 
+                        })}
+                      />
+                    </div>
+                  )}
 
                   <div className="form-group">
                     <label className="form-label">
@@ -86,7 +127,7 @@ function PostArticle() {
                       <span>Content</span>
                     </label>
                     <textarea
-                      {...register("content")}
+                      {...register("content", { required: true })}
                       className="custom-textarea"
                       rows="12"
                       placeholder="Write your article content here..."

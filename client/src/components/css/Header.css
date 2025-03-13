@@ -87,7 +87,7 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 150px;
+  width: 200px;
   background-color: #1a1b1e;
   z-index: 1000;
   border-radius: 8px;

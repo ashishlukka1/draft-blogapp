@@ -66,6 +66,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.5rem;
+  /* padding: 2rem;    */
+  max-width: 1200px;
+  margin: 4rem 0;
 }
 
 .stat-card {
@@ -402,7 +405,7 @@
   }
 
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .features-grid {

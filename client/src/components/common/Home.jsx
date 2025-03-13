@@ -5,6 +5,8 @@ import axios from "axios";
 import { Palette, Layout, Mouse } from "lucide-react";
 import image from "../../assets/1.jpeg";
 import { Link, useNavigate, NavLink } from "react-router-dom";
+import { SiClerk } from "react-icons/si";
+import { FaGithub } from "react-icons/fa";
 import { Shield, PenSquare, User, Users } from "lucide-react";
 import {
   FaUserAstronaut,
@@ -237,6 +239,14 @@ function Home() {
               <div className="tech-item">
                 <SiExpress />
                 <span>Express</span>
+              </div>
+              <div className="tech-item">
+                <SiClerk />
+                <span>Clerk</span>
+              </div>
+              <div className="tech-item">
+                  <FaGithub />
+                <span>GitHub</span>
               </div>
               {/* <div className="tech-item">
                 <SiTailwindcss />

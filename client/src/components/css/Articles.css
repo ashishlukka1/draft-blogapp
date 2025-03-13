@@ -9,6 +9,7 @@
     padding-left: var(--bs-gutter-x, 0.75rem);
     margin-right: auto;
     margin-left: auto;
+    margin-bottom: 1.5rem;
 }
 
 /* Match Bootstrap's container max-widths */
@@ -74,8 +75,8 @@
 }
 
 .author-avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px;   /* Reduced from 40px */
+    height: 32px;  /* Reduced from 40px */
     border-radius: 50%;
     margin-right: 0.75rem;
     border: 2px solid rgba(255, 255, 255, 0.1);
@@ -181,7 +182,7 @@
     padding-left: var(--bs-gutter-x, 0.75rem);
     margin-right: auto;
     margin-left: auto;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .filter-section .d-flex {

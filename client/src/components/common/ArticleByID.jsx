@@ -6,7 +6,7 @@ import { MdDelete, MdRestore } from "react-icons/md";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
-import '../css/ArticleByID.css'
+import '../css/ArticleByID.css';
 
 function ArticleByID() {
   const { state } = useLocation();
@@ -20,6 +20,19 @@ function ArticleByID() {
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isOriginalAuthor, setIsOriginalAuthor] = useState(false);
+  
+  // Add a state for mobile view detection
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Simple check for author ownership - using both ID and name
@@ -42,6 +55,18 @@ function ArticleByID() {
       setIsOriginalAuthor(false);
     }
   }, [currentUser, currentArticle, editArticleStatus]);
+
+  // Function to format article content with paragraph breaks
+  const formatContent = (content) => {
+    if (!content) return "";
+    
+    // Split content by line breaks and render each paragraph
+    return content.split('\n').map((paragraph, index) => (
+      <p key={index} className="content-paragraph">
+        {paragraph}
+      </p>
+    ));
+  };
 
   function enableEdit() {
     if (!isOriginalAuthor) {
@@ -205,20 +230,13 @@ function ArticleByID() {
     }
   }
 
-  // Add some debugging to help troubleshoot
-  console.log("Article author name:", currentArticle?.authorData?.nameOfAuthor);
-  console.log("Current user name:", currentUser?.firstName);
-  console.log("Author ID match:", currentUser?.id === currentArticle?.authorData?.authorId);
-  console.log("Name match:", currentUser?.firstName === currentArticle?.authorData?.nameOfAuthor);
-  console.log("Is original author:", isOriginalAuthor);
-
   return (
     <div className="article-container">
       <button 
         className="back-button" 
         onClick={() => navigate(`/author-profile/articles`)}
       > 
-        {/* <FaArrowLeft size={16} /> */}
+        <FaArrowLeft size={16} />
         <span>Back to Articles</span>
       </button>
 
@@ -268,13 +286,13 @@ function ArticleByID() {
           </div>
 
           <div className="article-content">
-            {currentArticle.content}
+            {formatContent(currentArticle.content)}
           </div>
 
           <div className="comments-section">
             <h2 className="comments-title">Comments</h2>
             {currentArticle.comments && currentArticle.comments.length === 0 ? (
-              <p className="text-muted">No comments yet...</p>
+              <p className="text-muted ">No comments yet...</p>
             ) : (
               (currentArticle.comments || []).map((commentObj) => (
                 <div key={commentObj._id} className="comment-item">
@@ -285,7 +303,7 @@ function ArticleByID() {
             )}
           </div>
 
-          {currentUser.role === "user" && (
+          {currentUser?.role === "user" && (
             <div className="comment-form">
               <form onSubmit={handleSubmit(addComment)}>
                 <input
@@ -349,21 +367,23 @@ function ArticleByID() {
             </div>
             <div className="text-end">
               {saveError && <p className="text-error mb-2">{saveError}</p>}
-              <button 
-                type="submit" 
-                className="submit-button"
-                disabled={isSaving}
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </button>
-              <button 
-                type="button"
-                className="submit-button"
-                onClick={() => setEditArticleStatus(false)}
-                disabled={isSaving}
-              >
-                Cancel
-              </button>
+              <div className={isMobileView ? "full-width-buttons" : ""}>
+                <button 
+                  type="submit" 
+                  className="submit-button"
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </button>
+                <button 
+                  type="button"
+                  className="submit-button"
+                  onClick={() => setEditArticleStatus(false)}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </form>
         </div>

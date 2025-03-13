@@ -1,11 +1,3 @@
-:root {
-  --bg: #1B1B1F;
-  --dark: #161618;
-  --text-pink: #F56565;
-  --bg-pink: #F67373;
-  --light: #EBEBF5;
-}
-
 body {
   background-color: var(--bg);
   color: var(--light);
@@ -64,13 +56,24 @@ body {
   font-size: 16px;
 }
 
+/* Custom card container to wrap both SignIn and footer */
+.custom-card-container {
+  /* width: 100%; */
+  background: linear-gradient(145deg, #161618, #1a1a1c);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  overflow: hidden;
+}
+
 /* Clerk customization */
 .auth-card {
-  background-color: var(--dark) !important;
-  border-radius: 12px !important;
-  padding: 24px !important;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background-color: transparent !important;
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 2rem 2rem 1rem 2rem !important;
+  border-radius: 0 !important;
 }
 
 .auth-title {
@@ -147,9 +150,16 @@ body {
 }
 
 /* Additional dark mode overrides */
-.cl-rootBox, .cl-card, .cl-component {
-  background-color: var(--dark) !important;
+.cl-rootBox, .cl-component {
+  background-color: transparent !important;
   color: var(--light) !important;
+}
+
+/* This ensures the card background blends with the page background */
+.cl-card {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .cl-dividerText {
@@ -173,9 +183,13 @@ body {
   color: rgba(235, 235, 245, 0.7) !important;
 }
 
-.cl-footer {
-  background-color: var(--dark) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+/* Hide the Clerk footer and development mode */
+.cl-footer, .cl-development-mode {
+  display: none !important;
+}
+
+.hidden-footer {
+  display: none !important;
 }
 
 .cl-formFieldLabel {
@@ -199,29 +213,43 @@ body {
   color: var(--light) !important;
 }
 
-.cl-development-mode {
-  background-color: var(--dark) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-.cl-development-mode-text {
-  color: rgba(235, 235, 245, 0.6) !important;
-}
-
-.cl-development-mode-badge {
-  background-color: var(--bg) !important;
-}
-
 /* Ensure the entire component uses dark mode */
 .cl-userButtonPopoverCard, .cl-userButtonTrigger, .cl-userPreview {
   background-color: var(--dark) !important;
   color: var(--light) !important;
 }
 
+/* Custom footer styling - updated to be part of the card */
+.custom-footer {
+  padding: 1rem;
+  color: var(--light);
+  opacity: 0.7;
+  font-size: 14px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 0;
+}
+
+.custom-link {
+  color: var(--bg-pink);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s, text-decoration 0.3s;
+}
+
+.custom-link:hover {
+  color: var(--text-pink);
+  text-decoration: underline;
+}
+
 /* Additional responsive styles */
 @media (max-width: 480px) {
   .auth-card {
-    padding: 20px !important;
+    padding: 20px 20px 10px 20px !important;
+  }
+  
+  .custom-footer {
+    padding: 10px 20px 10px;
   }
   
   .welcome-title {
