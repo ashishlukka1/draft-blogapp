@@ -7,7 +7,17 @@ const authorApp = require("./APIs/authorApi");
 const adminApp = require("./APIs/adminApi");
 const cors = require("cors");
 
-app.use(cors());
+// CORS Configuration
+const corsOptions = {
+  origin: "https://draft-blogapp.vercel.app", // Allow only your frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Handle preflight requests
+
 app.use(exp.json());
 
 // Database connection
@@ -21,6 +31,15 @@ mongoose
 app.use("/user-api", userApp);
 app.use("/author-api", authorApp);
 app.use("/admin-api", adminApp);
+
+// Middleware to manually set CORS headers (if needed)
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://draft-blogapp.vercel.app");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  next();
+});
 
 // Global error handling middleware
 app.use((err, req, res, next) => {
