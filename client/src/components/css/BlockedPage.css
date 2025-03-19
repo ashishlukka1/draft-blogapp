@@ -1,0 +1,107 @@
+/* BlockedPage.css - Import this in your Blocked page component */
+.blocked-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    padding: 20px;
+  }
+  
+  .blocked-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 550px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .blocked-icon {
+    margin-bottom: 20px;
+  }
+  
+  .blocked-title {
+    font-size: 2rem;
+    color: #e74c3c;
+    margin-bottom: 20px;
+  }
+  
+  .blocked-message {
+    background-color: #fff5f5;
+    border-left: 4px solid #e74c3c;
+    padding: 15px;
+    margin-bottom: 30px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .warning-icon {
+    color: #e74c3c;
+    font-size: 24px;
+  }
+  
+  .blocked-profile-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .blocked-email {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+  
+  .blocked-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .blocked-link {
+    text-decoration: none;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+    color: #343a40;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .blocked-link:hover {
+    background-color: #e9ecef;
+  }
+  
+  .sign-out-button {
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .sign-out-button:hover {
+    background-color: #c0392b;
+  }
+  
+  .contact-support {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  .support-email {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .support-email:hover {
+    text-decoration: underline;
+  }

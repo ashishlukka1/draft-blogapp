@@ -27,6 +27,7 @@ function Home() {
   const { isSignedIn, user, isLoaded } = useUser();
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [processingRole, setProcessingRole] = useState(false);
   const navigate = useNavigate();
 
   const handleCopyEmail = () => {
@@ -37,85 +38,122 @@ function Home() {
 
   async function onSelectRole(e) {
     setError("");
+    setProcessingRole(true);
     const selectedRole = e.target.value;
-    currentUser.role = selectedRole;
-    console.log(currentUser);
-    let res = null;
+    let tempUser = { ...currentUser, role: selectedRole };
+    console.log("Selected role:", selectedRole);
+    
     try {
-      if (selectedRole === "author") {
-        
-        res = await axios.post(
-          
-          "https://draft-blogapp-backend2.vercel.app/author-api/author",
-          currentUser
+      if (selectedRole === "admin") {
+        // Check admin access first
+        const res = await axios.post(
+          `https://draft-blogapp-backend2.vercel.app/admin-api/users-authors`,
+          tempUser
         );
-        let { message, payload } = res.data;
-        if (message === "author") {
-          setCurrentUser({ ...currentUser, ...payload });
+        const { message, payload } = res.data;
+        
+        if (message === "admin") {
+          setCurrentUser({ ...tempUser, ...payload });
           localStorage.setItem("currentuser", JSON.stringify(payload));
         } else {
-          setError(message);
+          setError("Invalid role. You don't have admin privileges.");
+          resetRadioSelection();
+        }
+      }
+      else if (selectedRole === "author") {
+        const res = await axios.post(
+          "https://draft-blogapp-backend2.vercel.app/author-api/author",
+          tempUser
+        );
+        const { message, payload } = res.data;
+        
+        if (message === "author") {
+          // Check if account is active
+          if (!payload.isActive) {
+            setError("Your author account is blocked. Please contact admin for assistance.");
+            resetRadioSelection();
+          } else {
+            setCurrentUser({ ...tempUser, ...payload });
+            localStorage.setItem("currentuser", JSON.stringify(payload));
+          }
+        } else {
+          setError("Invalid role. You don't have author privileges.");
+          resetRadioSelection();
         }
       }
       else if (selectedRole === "user") {
-        res = await axios.post(
+        const res = await axios.post(
           `https://draft-blogapp-backend2.vercel.app/user-api/user`,
-          currentUser
+          tempUser
         );
-        let { message, payload } = res.data;
+        const { message, payload } = res.data;
+        
         if (message === "user") {
-          setCurrentUser({ ...currentUser, ...payload });
-          localStorage.setItem("currentuser", JSON.stringify(payload));
+          // Check if account is active
+          if (!payload.isActive) {
+            setError("Your account is blocked. Please contact admin for assistance.");
+            resetRadioSelection();
+          } else {
+            setCurrentUser({ ...tempUser, ...payload });
+            localStorage.setItem("currentuser", JSON.stringify(payload));
+          }
         } else {
-          setError(message);
-        }
-      }
-      else if (selectedRole === "admin") {
-        res = await axios.post(
-          `https://draft-blogapp-backend2.vercel.app/admin-api/admin`,
-          currentUser
-        );
-        let { message, payload } = res.data;
-        if (message === "admin") {
-          setCurrentUser({ ...currentUser, ...payload });
-          localStorage.setItem("currentuser", JSON.stringify(payload));
-        } else {
-          setError(message);
+          setError("Invalid role. You don't have user privileges.");
+          resetRadioSelection();
         }
       }
     } catch (err) {
+      console.error("Role selection error:", err);
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
       } else {
-        setError(err.message);
+        setError(err.message || "An error occurred. Please try again.");
       }
+      resetRadioSelection();
+    } finally {
+      setProcessingRole(false);
     }
   }
 
+  // Function to reset radio button selection
+  const resetRadioSelection = () => {
+    const radios = document.querySelectorAll('input[name="role"]');
+    radios.forEach(radio => {
+      radio.checked = false;
+    });
+  };
+
   useEffect(() => {
     if (isSignedIn === true) {
+      // Reset user state when logged in
       setCurrentUser({
-        ...currentUser,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.emailAddresses[0].emailAddress,
         profileImageUrl: user.imageUrl,
-        // username: `${user.firstName} ${user.lastName}`
+        // Do not set role here, let the user choose
       });
+      
+      // Clear any previous errors
+      setError("");
+      resetRadioSelection();
     }
-  }, [isLoaded]);
+  }, [isLoaded, isSignedIn]);
 
   useEffect(() => {
-    if (currentUser?.role === "user" && error.length === 0) {
-      navigate(`/user-profile/${currentUser.email}`);
+    // Only navigate when there's a valid role and no error
+    if (!processingRole && error === "" && currentUser?.role) {
+      if (currentUser.role === "user") {
+        navigate(`/user-profile/${currentUser.email}`);
+      }
+      else if (currentUser.role === "author") {
+        navigate(`/author-profile/${currentUser.email}`);
+      }
+      else if (currentUser.role === "admin") {
+        navigate(`/admin-profile/${currentUser.email}`);
+      }
     }
-    if (currentUser?.role === "author" && error.length === 0) {
-      navigate(`/author-profile/${currentUser.email}`);
-    }
-    if (currentUser?.role === "admin" && error.length === 0) {
-      navigate(`/admin-profile/${currentUser.email}`);
-    }
-  }, [currentUser]);
+  }, [currentUser, processingRole, error, navigate]);
 
   return (
     <div className="home-container">
@@ -291,6 +329,13 @@ function Home() {
                   {error}
                 </div>
               )}
+              {processingRole && (
+                <div className="text-center mb-3">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              )}
               <div className="role-options">
                 <div className="role-card">
                   <input
@@ -300,6 +345,7 @@ function Home() {
                     value="admin"
                     className="role-input"
                     onChange={onSelectRole}
+                    disabled={processingRole}
                   />
                   <label htmlFor="admin" className="role-label">
                     <FaShieldAlt className="role-icon" />
@@ -315,6 +361,7 @@ function Home() {
                     value="author"
                     className="role-input"
                     onChange={onSelectRole}
+                    disabled={processingRole}
                   />
                   <label htmlFor="author" className="role-label">
                     <FaUserEdit className="role-icon" />
@@ -330,6 +377,7 @@ function Home() {
                     value="user"
                     className="role-input"
                     onChange={onSelectRole}
+                    disabled={processingRole}
                   />
                   <label htmlFor="user" className="role-label">
                     <FaUserAstronaut className="role-icon" />

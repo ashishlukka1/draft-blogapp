@@ -6,46 +6,40 @@ const userApp = require("./APIs/userApi");
 const authorApp = require("./APIs/authorApi");
 const adminApp = require("./APIs/adminApi");
 const cors = require("cors");
+const port = process.env.PORT || 3000;
 
-// CORS Configuration
+// CORS Configuration for local development
 const corsOptions = {
-  origin: "https://draft-blogapp.vercel.app", // Allow only your frontend
+  origin: "http://localhost:5173", // Allow your local React app
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight requests
 
+// Body parser middleware
 app.use(exp.json());
 
 // Database connection
-console.log("DBURL from env:", process.env.DBURL);
 mongoose
   .connect(process.env.DBURL)
-  .then(() => console.log("Database connection successful"))
-  .catch((err) => console.log("Database connection failed: ", err));
+  .then(() => {
+    app.listen(port, () => console.log(`Server listening on port ${port}...`));
+    console.log("Database connection successful");
+  })
+  .catch((err) => console.log("Error in DB connection: ", err));
 
 // API routes
 app.use("/user-api", userApp);
 app.use("/author-api", authorApp);
 app.use("/admin-api", adminApp);
 
-// Middleware to manually set CORS headers (if needed)
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://draft-blogapp.vercel.app");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  next();
-});
-  
 // Global error handling middleware
 app.use((err, req, res, next) => {
   console.log("Error encountered:", err);
   res.status(500).send({ message: err.message });
 });
 
-// Export the Express app for Vercel
+// No need to export the app when running locally
 module.exports = app;
