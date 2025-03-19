@@ -2,7 +2,8 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { userAuthorContextObj } from "../../contexts/UserAuthorContext";
-import './AdminProfile.css'; // Import the CSS file
+import { useAuth } from "@clerk/clerk-react"; // Import Clerk's useAuth hook
+import './AdminProfile.css';
 
 function AdminProfile() {
   const [users, setUsers] = useState([]);
@@ -11,6 +12,7 @@ function AdminProfile() {
   const { email } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(userAuthorContextObj);
+  const { getToken } = useAuth(); // Get the token function from Clerk
 
   useEffect(() => {
     // Check if user is logged in and is an admin
@@ -19,17 +21,31 @@ function AdminProfile() {
       return;
     }
 
-    setLoading(true);
-    
-    axios.get("https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", {
-      withCredentials: true
-    })
-      .then(response => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        
+        // Get the token from Clerk
+        const token = await getToken();
+        
+        if (!token) {
+          throw new Error("Not authenticated");
+        }
+        
+        // Make the request with the token in the Authorization header
+        const response = await axios.get(
+          "https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", 
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
         console.log("Data received:", response.data);
         setUsers(response.data);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Error fetching users:", err);
         if (err.response && err.response.status === 401) {
           navigate("/");
@@ -37,23 +53,39 @@ function AdminProfile() {
           setError("Failed to fetch users: " + (err.response?.data?.message || err.message));
           setLoading(false);
         }
-      });
-  }, [currentUser, navigate]);
+      }
+    };
 
-  const updateStatus = (email, isActive) => {
-    axios.put(`https://draft-blogapp-backend2.vercel.app/admin-api/update-status/${email}`, 
-      { isActive },
-      { withCredentials: true }
-    )
-      .then(response => {
-        setUsers(users.map(user => 
-          user.email === email ? response.data.user : user
-        ));
-      })
-      .catch(error => {
-        console.error("Error updating status:", error);
-        setError("Failed to update user status: " + (error.response?.data?.message || error.message));
-      });
+    fetchUsers();
+  }, [currentUser, navigate, getToken]);
+
+  const updateStatus = async (email, isActive) => {
+    try {
+      // Get the token from Clerk
+      const token = await getToken();
+      
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+      
+      // Make the request with the token in the Authorization header
+      const response = await axios.put(
+        `https://draft-blogapp-backend2.vercel.app/admin-api/update-status/${email}`,
+        { isActive },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      setUsers(users.map(user => 
+        user.email === email ? response.data.user : user
+      ));
+    } catch (error) {
+      console.error("Error updating status:", error);
+      setError("Failed to update user status: " + (error.response?.data?.message || error.message));
+    }
   };
 
   if (loading) {
