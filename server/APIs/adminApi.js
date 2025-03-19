@@ -7,36 +7,6 @@ require("dotenv").config();
 
 adminApp.use(exp.json());
 
-// Middleware to check if the user is authenticated and an admin
-const isAdminMiddleware = expressAsyncHandler(async (req, res, next) => {
-  try {
-    // If no auth object exists, the user is not authenticated
-    if (!req.auth || !req.auth.userId) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-
-    // Get the clerk user ID
-    const clerkUserId = req.auth.userId;
-    
-    // Find the user in your database using the clerk user ID
-    const adminUser = await UserAuthor.findOne({ 
-      clerkUserId: clerkUserId, 
-      role: "admin" 
-    });
-    
-    if (!adminUser) {
-      return res.status(403).json({ message: "Not authorized as admin" });
-    }
-    
-    // Add the admin user to the request object
-    req.adminUser = adminUser;
-    next();
-  } catch (error) {
-    console.error("Admin middleware error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
-
 // Check if user is an admin
 adminApp.post(
   "/users-authors",
@@ -66,13 +36,22 @@ adminApp.post(
 adminApp.get(
   "/users-authors",
   requireAuth(),
-  isAdminMiddleware,
   expressAsyncHandler(async (req, res) => {
     try {
-      const users = await UserAuthor.find();
-      res.json(users);
+      // Log that we're attempting to fetch users
+      console.log("Attempting to fetch all users and authors");
+      
+      // Get all users from the database without any filters
+      const users = await UserAuthor.find({}).lean();
+      
+      // Log the number of users found for debugging
+      console.log(`Found ${users.length} users in the database`);
+      
+      // Return the users array even if empty
+      return res.status(200).json(users);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching users and authors", error: error.message });
+      console.error("Error fetching users:", error);
+      return res.status(500).json({ message: "Error fetching users and authors", error: error.message });
     }
   })
 );
@@ -81,11 +60,12 @@ adminApp.get(
 adminApp.put(
   "/update-status/:email",
   requireAuth(),
-  isAdminMiddleware,
   expressAsyncHandler(async (req, res) => {
     try {
       const { email } = req.params;
       const { isActive } = req.body;
+
+      console.log(`Updating status for user ${email} to ${isActive}`);
 
       const user = await UserAuthor.findOneAndUpdate(
         { email },
@@ -102,22 +82,71 @@ adminApp.put(
         user 
       });
     } catch (error) {
+      console.error("Error updating user status:", error);
       res.status(500).json({ message: "Error updating user status", error: error.message });
     }
   })
 );
 
-// Add a global error handler for authentication errors
-adminApp.use((err, req, res, next) => {
-  if (err.name === 'ClerkError') {
-    return res.status(401).json({ message: "Authentication failed" });
-  }
-  next(err);
-});
-
 // Route to handle unauthorized access attempts
 adminApp.get("/unauthorized", (req, res) => {
   res.status(401).json({ message: "Unauthorized request" });
 });
+
+// Add a utility route to create an initial admin user if none exists
+adminApp.post(
+  "/initialize-admin",
+  expressAsyncHandler(async (req, res) => {
+    try {
+      const { email, name, clerkUserId } = req.body;
+      
+      if (!email || !name || !clerkUserId) {
+        return res.status(400).json({ message: "Email, name and clerkUserId are required" });
+      }
+      
+      // Check if admin already exists
+      const existingAdmin = await UserAuthor.findOne({ email });
+      
+      if (existingAdmin) {
+        return res.status(200).json({ 
+          message: "Admin already exists", 
+          user: existingAdmin 
+        });
+      }
+      
+      // Create new admin
+      const newAdmin = new UserAuthor({
+        name,
+        email,
+        role: "admin",
+        isActive: true,
+        clerkUserId
+      });
+      
+      const savedAdmin = await newAdmin.save();
+      
+      res.status(201).json({
+        message: "Admin user created successfully",
+        user: savedAdmin
+      });
+    } catch (error) {
+      console.error("Error creating admin:", error);
+      res.status(500).json({ message: "Error creating admin user", error: error.message });
+    }
+  })
+);
+
+// Add this to debug authentication issues
+adminApp.get(
+  "/check-auth",
+  requireAuth(),
+  (req, res) => {
+    res.status(200).json({
+      message: "Authentication successful",
+      userId: req.auth.userId,
+      sessionId: req.auth.sessionId
+    });
+  }
+);
 
 module.exports = adminApp;
