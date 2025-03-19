@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { userAuthorContextObj } from "../../contexts/UserAuthorContext";
-import './AdminProfile.css';
+import './AdminProfile.css'; // Import the CSS file
 
 function AdminProfile() {
   const [users, setUsers] = useState([]);
@@ -11,116 +11,48 @@ function AdminProfile() {
   const { email } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(userAuthorContextObj);
-  const API_BASE_URL = "https://draft-blogapp-backend2.vercel.app";
 
   useEffect(() => {
     // Check if user is logged in and is an admin
-    if (!currentUser) {
-      console.log("No user found in context, redirecting to home");
+    if (!currentUser || !currentUser.role || currentUser.role !== "admin") {
       navigate("/");
       return;
     }
 
-    if (currentUser.role !== "admin") {
-      console.log("User is not an admin, redirecting to home");
-      navigate("/");
-      return;
-    }
-
-    const fetchUsers = async () => {
-      setLoading(true);
-      
-      try {
-        // Log cookies for debugging
-        console.log("Cookies before request:", document.cookie);
-        
-        const response = await axios.get(`${API_BASE_URL}/admin-api/users-authors`, {
-          withCredentials: true,
-          // Include timeout to prevent hanging requests
-          timeout: 10000
-        });
-        
-        console.log("API response:", response);
-        setUsers(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error details:", err);
-        
-        // Enhanced error logging
-        if (err.response) {
-          // The request was made and the server responded with a status code
-          console.error("Server response error:", {
-            status: err.response.status,
-            data: err.response.data,
-            headers: err.response.headers
-          });
-          
-          if (err.response.status === 401) {
-            console.log("Authentication failed, redirecting to login");
-            // Clear any potentially invalid auth tokens/cookies
-            // This depends on how you're storing auth (localStorage, cookies, etc.)
-            // localStorage.removeItem('authToken');
-            navigate("/login");
-          }
-        } else if (err.request) {
-          // The request was made but no response was received
-          console.error("No response received:", err.request);
-          setError("Server did not respond. Please check your connection and try again.");
-        } else {
-          // Something else caused the error
-          console.error("Request setup error:", err.message);
-          setError(`Request failed: ${err.message}`);
-        }
-        
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, [currentUser, navigate]);
-
-  const updateStatus = async (email, isActive) => {
-    try {
-      const response = await axios.put(
-        `${API_BASE_URL}/admin-api/update-status/${email}`, 
-        { isActive },
-        { withCredentials: true }
-      );
-      
-      console.log("Status update response:", response.data);
-      
-      // Update the local state with the updated user
-      setUsers(users.map(user => 
-        user.email === email ? response.data.user : user
-      ));
-    } catch (error) {
-      console.error("Error updating status:", error);
-      
-      const errorMessage = error.response?.data?.message || error.message;
-      setError(`Failed to update user status: ${errorMessage}`);
-      
-      // Check if the error is due to authentication issues
-      if (error.response?.status === 401) {
-        navigate("/login");
-      }
-    }
-  };
-
-  const retryFetch = () => {
-    setError(null);
     setLoading(true);
     
-    axios.get(`${API_BASE_URL}/admin-api/users-authors`, {
+    axios.get("https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", {
       withCredentials: true
     })
       .then(response => {
+        console.log("Data received:", response.data);
         setUsers(response.data);
         setLoading(false);
       })
       .catch(err => {
-        console.error("Retry failed:", err);
-        setError("Failed to fetch users: " + (err.response?.data?.message || err.message));
-        setLoading(false);
+        console.error("Error fetching users:", err);
+        if (err.response && err.response.status === 401) {
+          navigate("/");
+        } else {
+          setError("Failed to fetch users: " + (err.response?.data?.message || err.message));
+          setLoading(false);
+        }
+      });
+  }, [currentUser, navigate]);
+
+  const updateStatus = (email, isActive) => {
+    axios.put(`https://draft-blogapp-backend2.vercel.app/admin-api/update-status/${email}`, 
+      { isActive },
+      { withCredentials: true }
+    )
+      .then(response => {
+        setUsers(users.map(user => 
+          user.email === email ? response.data.user : user
+        ));
+      })
+      .catch(error => {
+        console.error("Error updating status:", error);
+        setError("Failed to update user status: " + (error.response?.data?.message || error.message));
       });
   };
 
@@ -143,7 +75,7 @@ function AdminProfile() {
         <div className="admin-header">
           <div>
             <h1 className="admin-title">Admin Dashboard</h1>
-            {currentUser && <p className="admin-subtitle">Logged in as: {currentUser.email}</p>}
+            {email && <p className="admin-subtitle">Logged in as: {email}</p>}
           </div>
           <div className="admin-badge">
             <svg className="admin-badge-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -161,15 +93,6 @@ function AdminProfile() {
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <p className="admin-error-message">{error}</p>
-            <button className="admin-retry-button" onClick={retryFetch}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 2v6h6"></path>
-                <path d="M21 12A9 9 0 0 0 6 5.3L3 8"></path>
-                <path d="M21 22v-6h-6"></path>
-                <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7"></path>
-              </svg>
-              Retry
-            </button>
           </div>
         )}
         
@@ -215,7 +138,6 @@ function AdminProfile() {
                       <button
                         className={`admin-action-button ${user.isActive ? "block" : "enable"}`}
                         onClick={() => updateStatus(user.email, !user.isActive)}
-                        disabled={user.email === currentUser?.email} // Prevent self-blocking
                       >
                         {user.isActive ? (
                           <>
