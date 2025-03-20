@@ -8,47 +8,27 @@ const adminApp = require("./APIs/adminApi");
 const cors = require("cors");
 const port = process.env.PORT || 3000;
 
-// Enhanced CORS configuration
-app.use(cors({
-  origin: ["https://draft-blogapp.vercel.app", "http://localhost:3000"], // Allow both production and local development
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+// CORS Configuration for local development
+const corsOptions = {
+  origin: "https://draft-blogapp.vercel.app", // Allow your local React app
+  methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["Authorization"],
   credentials: true,
-  maxAge: 86400 // 24 hours
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Body parser middleware
 app.use(exp.json());
 
-// Options pre-flight request handler for CORS
-app.options('*', cors());
-
-// Middleware to log incoming requests (for debugging)
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  if (req.headers.authorization) {
-    console.log('Authorization header present');
-  }
-  next();
-});
-
-// Connect to database without starting a server (Vercel handles the serverless function)
+// Database connection
 mongoose
   .connect(process.env.DBURL)
   .then(() => {
-    // In local development, start the server
-    if (process.env.NODE_ENV !== 'production') {
-      app.listen(port, () => console.log(`Server listening on port ${port}...`));
-    }
+    app.listen(port, () => console.log(`Server listening on port ${port}...`));
     console.log("Database connection successful");
   })
   .catch((err) => console.log("Error in DB connection: ", err));
-
-// Optional: Add a health check endpoint
-app.get("/", (req, res) => {
-  res.status(200).send({ message: "API is running" });
-});
 
 // API routes
 app.use("/user-api", userApp);
@@ -61,5 +41,5 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: err.message });
 });
 
-// Export the Express app for Vercel serverless functions
+// No need to export the app when running locally
 module.exports = app;

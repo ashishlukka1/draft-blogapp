@@ -2,8 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { userAuthorContextObj } from "../../contexts/UserAuthorContext";
-import { useAuth } from "@clerk/clerk-react";
-import './AdminProfile.css';
+import './AdminProfile.css'; // Import the CSS file
 
 function AdminProfile() {
   const [users, setUsers] = useState([]);
@@ -12,7 +11,6 @@ function AdminProfile() {
   const { email } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useContext(userAuthorContextObj);
-  const { getToken } = useAuth();
 
   useEffect(() => {
     // Check if user is logged in and is an admin
@@ -21,118 +19,41 @@ function AdminProfile() {
       return;
     }
 
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Get session token from Clerk
-        const token = await getToken({ template: "session" });
-        
-        if (!token) {
-          throw new Error("Not authenticated");
-        }
-        
-        // Make the request with the token in the Authorization header
-        const response = await axios.get(
-          "https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", 
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-        
-        if (response.data && Array.isArray(response.data)) {
-          setUsers(response.data);
-        } else {
-          console.error("Invalid response format:", response.data);
-          setError("Invalid data format received from server");
-        }
-      } catch (err) {
-        console.error("Error fetching users:", err);
-        
-        // Handle different error scenarios
-        if (err.response) {
-          // Server responded with an error status
-          console.error("Server error:", err.response.status, err.response.data);
-          if (err.response.status === 401) {
-            setError("Authentication failed. Please log in again.");
-            setTimeout(() => navigate("/"), 3000);
-          } else {
-            setError(`Server error: ${err.response.data.error || err.response.statusText}`);
-          }
-        } else if (err.request) {
-          // Request was made but no response received
-          setError("No response from server. Please check your connection.");
-        } else {
-          // Something else went wrong
-          setError("Error: " + err.message);
-        }
-      } finally {
+    setLoading(true);
+    
+    axios.get("https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", {
+      withCredentials: true
+    })
+      .then(response => {
+        console.log("Data received:", response.data);
+        setUsers(response.data);
         setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, [currentUser, navigate, getToken]);
-
-  const updateStatus = async (email, isActive) => {
-    try {
-      setError(null);
-      
-      // Get the token from Clerk
-      const token = await getToken({ template: "session" });
-      
-      if (!token) {
-        throw new Error("Not authenticated");
-      }
-      
-      // Make the request with the token in the Authorization header
-      const response = await axios.put(
-        `https://draft-blogapp-backend2.vercel.app/admin-api/update-status/${email}`,
-        { isActive },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+      })
+      .catch(err => {
+        console.error("Error fetching users:", err);
+        if (err.response && err.response.status === 401) {
+          navigate("/");
+        } else {
+          setError("Failed to fetch users: " + (err.response?.data?.message || err.message));
+          setLoading(false);
         }
-      );
-      
-      if (response.data && response.data.user) {
-        // Update the users array with the updated user
+      });
+  }, [currentUser, navigate]);
+
+  const updateStatus = (email, isActive) => {
+    axios.put(`https://draft-blogapp-backend2.vercel.app/admin-api/update-status/${email}`, 
+      { isActive },
+      { withCredentials: true }
+    )
+      .then(response => {
         setUsers(users.map(user => 
           user.email === email ? response.data.user : user
         ));
-        
-        // Show a success message (optional)
-        const successMessage = document.createElement('div');
-        successMessage.className = 'admin-success';
-        successMessage.innerHTML = `<p>User ${isActive ? 'enabled' : 'disabled'} successfully</p>`;
-        document.querySelector('.admin-container').appendChild(successMessage);
-        
-        // Remove the success message after 3 seconds
-        setTimeout(() => {
-          if (successMessage.parentNode) {
-            successMessage.parentNode.removeChild(successMessage);
-          }
-        }, 3000);
-      } else {
-        throw new Error("Invalid response format");
-      }
-    } catch (err) {
-      console.error("Error updating status:", err);
-      
-      if (err.response) {
-        setError(`Failed to update user status: ${err.response.data.error || err.response.statusText}`);
-      } else if (err.request) {
-        setError("No response from server. Please check your connection.");
-      } else {
-        setError("Error: " + err.message);
-      }
-    }
+      })
+      .catch(error => {
+        console.error("Error updating status:", error);
+        setError("Failed to update user status: " + (error.response?.data?.message || error.message));
+      });
   };
 
   if (loading) {
@@ -193,25 +114,17 @@ function AdminProfile() {
                     <td>
                       <div className="admin-user">
                         <div className="admin-user-avatar">
-                          {user.profileImageUrl ? (
-                            <img 
-                              src={user.profileImageUrl} 
-                              alt={`${user.firstName}'s avatar`} 
-                              className="admin-user-avatar-img" 
-                            />
-                          ) : (
-                            <svg className="admin-user-avatar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                              <circle cx="12" cy="7" r="4" />
-                            </svg>
-                          )}
+                          <svg className="admin-user-avatar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
                         </div>
                         <span className="admin-user-name">{user.firstName} {user.lastName}</span>
                       </div>
                     </td>
                     <td className="admin-user-email">{user.email}</td>
                     <td>
-                      <span className={`admin-role-badge ${user.role === "admin" ? "admin" : user.role === "author" ? "author" : "user"}`}>
+                      <span className={`admin-role-badge ${user.role === "admin" ? "admin" : "user"}`}>
                         {user.role}
                       </span>
                     </td>
@@ -222,31 +135,27 @@ function AdminProfile() {
                       </div>
                     </td>
                     <td>
-                      {currentUser.email !== user.email ? (
-                        <button
-                          className={`admin-action-button ${user.isActive ? "block" : "enable"}`}
-                          onClick={() => updateStatus(user.email, !user.isActive)}
-                        >
-                          {user.isActive ? (
-                            <>
-                              <svg className="admin-action-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                              </svg>
-                              Block
-                            </>
-                          ) : (
-                            <>
-                              <svg className="admin-action-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                              Enable
-                            </>
-                          )}
-                        </button>
-                      ) : (
-                        <span className="admin-self-account">Current Account</span>
-                      )}
+                      <button
+                        className={`admin-action-button ${user.isActive ? "block" : "enable"}`}
+                        onClick={() => updateStatus(user.email, !user.isActive)}
+                      >
+                        {user.isActive ? (
+                          <>
+                            <svg className="admin-action-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            Block
+                          </>
+                        ) : (
+                          <>
+                            <svg className="admin-action-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Enable
+                          </>
+                        )}
+                      </button>
                     </td>
                   </tr>
                 ))
