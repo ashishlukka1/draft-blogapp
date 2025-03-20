@@ -2,125 +2,29 @@ const exp = require("express");
 const adminApp = exp.Router();
 const UserAuthor = require("../models/userAuthorModel");
 const expressAsyncHandler = require("express-async-handler");
-const { clerkClient } = require("@clerk/clerk-sdk-node");
+const { requireAuth, clerkMiddleware } = require("@clerk/express");
 require("dotenv").config();
 
 adminApp.use(exp.json());
 
-// Improved authentication middleware with better error handling and logging
-const authenticateAdmin = async (req, res, next) => {
-  try {
-    // Get the token from the Authorization header
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log("Missing or invalid authorization header");
-      return res.status(401).json({ message: "Missing or invalid authorization token" });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    console.log("Token received:", token.substring(0, 10) + "..."); // Log partial token for debugging
-    
-    // Verify with Clerk
-    try {
-      // Get session from token
-      const session = await clerkClient.sessions.verifyToken(token);
-      
-      if (!session) {
-        console.log("Invalid session token");
-        return res.status(401).json({ message: "Invalid session token" });
-      }
-      
-      console.log("Session verified, user ID:", session.userId);
-      
-      // Get user from session
-      const user = await clerkClient.users.getUser(session.userId);
-      
-      if (!user) {
-        console.log("User not found");
-        return res.status(401).json({ message: "User not found" });
-      }
-      
-      // Get primary email
-      const primaryEmail = user.emailAddresses.find(email => email.id === user.primaryEmailAddressId)?.emailAddress;
-      
-      if (!primaryEmail) {
-        console.log("Email not found");
-        return res.status(401).json({ message: "Email not found" });
-      }
-      
-      console.log("Found email:", primaryEmail);
-      
-      // Check if user is admin in your database
-      const adminUser = await UserAuthor.findOne({ email: primaryEmail, role: "admin" });
-      
-      if (!adminUser) {
-        console.log("Not an admin user");
-        return res.status(403).json({ message: "Not authorized as admin" });
-      }
-      
-      console.log("Admin verified");
-      
-      // Add user info to request for later use
-      req.userEmail = primaryEmail;
-      req.userId = session.userId;
-      
-      // Proceed if user is admin
-      next();
-    } catch (error) {
-      console.error("Token verification error:", error);
-      return res.status(401).json({ message: "Authentication failed", error: error.message });
-    }
-  } catch (error) {
-    console.error("Authentication middleware error:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
-  }
-};
-
-// Check if user is an admin
-adminApp.post(
-  "/users-authors",
-  expressAsyncHandler(async (req, res) => {
-    try {
-      const { email } = req.body;
-      // Check if user exists and is an admin
-      const adminUser = await UserAuthor.findOne({ email, role: "admin" });
-      
-      if (!adminUser) {
-        return res.status(403).json({ message: "not admin" });
-      }
-      
-      // Return admin user data with active status
-      return res.status(200).json({ 
-        message: "admin", 
-        payload: adminUser 
-      });
-    } catch (error) {
-      console.error("Admin verification error:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
-    }
-  })
-);
-
-// Get all users and authors (with custom authentication)
+// Get all users and authors (requires authentication)
 adminApp.get(
   "/users-authors",
-  authenticateAdmin,
+  requireAuth({ signInUrl: "unauthorized" }),
   expressAsyncHandler(async (req, res) => {
     try {
-      // Authentication middleware already verified this is an admin
       const users = await UserAuthor.find();
       res.json(users);
     } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Error fetching users and authors", error: error.message });
+      res.status(500).json({ error: "Error fetching users and authors" });
     }
   })
 );
 
-// Enable or disable a user/author (with custom authentication)
+// Enable or disable a user/author (requires authentication)
 adminApp.put(
   "/update-status/:email",
-  authenticateAdmin,
+  requireAuth({ signInUrl: "unauthorized" }),
   expressAsyncHandler(async (req, res) => {
     try {
       const { email } = req.params;
@@ -133,7 +37,7 @@ adminApp.put(
       );
 
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ error: "User not found" });
       }
 
       res.json({ 
@@ -141,14 +45,14 @@ adminApp.put(
         user 
       });
     } catch (error) {
-      res.status(500).json({ message: "Error updating user status", error: error.message });
+      res.status(500).json({ error: "Error updating user status" });
     }
   })
 );
 
 // Route to handle unauthorized access attempts
 adminApp.get("/unauthorized", (req, res) => {
-  res.status(401).json({ message: "Unauthorized request" });
+  res.send({ message: "Unauthorized request" });
 });
 
 module.exports = adminApp;
