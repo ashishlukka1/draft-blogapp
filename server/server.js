@@ -8,17 +8,30 @@ const adminApp = require("./APIs/adminApi");
 const cors = require("cors");
 const port = process.env.PORT || 3000;
 
-// CORS is handled by vercel.json headers, but we'll keep a basic configuration
-// for local development and as a fallback
+// Enhanced CORS configuration
 app.use(cors({
-  origin: "https://draft-blogapp.vercel.app",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: ["https://draft-blogapp.vercel.app", "http://localhost:3000"], // Allow both production and local development
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  exposedHeaders: ["Authorization"],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 }));
 
 // Body parser middleware
 app.use(exp.json());
+
+// Options pre-flight request handler for CORS
+app.options('*', cors());
+
+// Middleware to log incoming requests (for debugging)
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  if (req.headers.authorization) {
+    console.log('Authorization header present');
+  }
+  next();
+});
 
 // Connect to database without starting a server (Vercel handles the serverless function)
 mongoose

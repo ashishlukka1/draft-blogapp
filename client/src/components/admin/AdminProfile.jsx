@@ -25,19 +25,22 @@ function AdminProfile() {
       try {
         setLoading(true);
         
-        // Get the token from Clerk
-        const token = await getToken();
+        // Get the token from Clerk - specify the specific session token
+        const token = await getToken({ template: "session" });
         
         if (!token) {
           throw new Error("Not authenticated");
         }
+        
+        console.log("Token obtained from Clerk:", token.substring(0, 10) + "...");
         
         // Make the request with the token in the Authorization header
         const response = await axios.get(
           "https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", 
           {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
             }
           }
         );
@@ -47,8 +50,10 @@ function AdminProfile() {
         setLoading(false);
       } catch (err) {
         console.error("Error fetching users:", err);
+        console.error("Response data:", err.response?.data);
         if (err.response && err.response.status === 401) {
-          navigate("/");
+          setError("Authentication failed. Please log in again.");
+          setTimeout(() => navigate("/"), 3000);
         } else {
           setError("Failed to fetch users: " + (err.response?.data?.message || err.message));
           setLoading(false);
@@ -61,12 +66,14 @@ function AdminProfile() {
 
   const updateStatus = async (email, isActive) => {
     try {
-      // Get the token from Clerk
-      const token = await getToken();
+      // Get the token from Clerk - specify the specific session token
+      const token = await getToken({ template: "session" });
       
       if (!token) {
         throw new Error("Not authenticated");
       }
+      
+      console.log("Token for update:", token.substring(0, 10) + "...");
       
       // Make the request with the token in the Authorization header
       const response = await axios.put(
@@ -74,16 +81,20 @@ function AdminProfile() {
         { isActive },
         {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         }
       );
+      
+      console.log("Update response:", response.data);
       
       setUsers(users.map(user => 
         user.email === email ? response.data.user : user
       ));
     } catch (error) {
       console.error("Error updating status:", error);
+      console.error("Error response:", error.response?.data);
       setError("Failed to update user status: " + (error.response?.data?.message || error.message));
     }
   };

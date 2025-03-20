@@ -7,16 +7,18 @@ require("dotenv").config();
 
 adminApp.use(exp.json());
 
-// Custom authentication middleware
+// Improved authentication middleware with better error handling and logging
 const authenticateAdmin = async (req, res, next) => {
   try {
     // Get the token from the Authorization header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log("Missing or invalid authorization header");
       return res.status(401).json({ message: "Missing or invalid authorization token" });
     }
     
     const token = authHeader.split(' ')[1];
+    console.log("Token received:", token.substring(0, 10) + "..."); // Log partial token for debugging
     
     // Verify with Clerk
     try {
@@ -24,13 +26,17 @@ const authenticateAdmin = async (req, res, next) => {
       const session = await clerkClient.sessions.verifyToken(token);
       
       if (!session) {
+        console.log("Invalid session token");
         return res.status(401).json({ message: "Invalid session token" });
       }
+      
+      console.log("Session verified, user ID:", session.userId);
       
       // Get user from session
       const user = await clerkClient.users.getUser(session.userId);
       
       if (!user) {
+        console.log("User not found");
         return res.status(401).json({ message: "User not found" });
       }
       
@@ -38,18 +44,25 @@ const authenticateAdmin = async (req, res, next) => {
       const primaryEmail = user.emailAddresses.find(email => email.id === user.primaryEmailAddressId)?.emailAddress;
       
       if (!primaryEmail) {
+        console.log("Email not found");
         return res.status(401).json({ message: "Email not found" });
       }
+      
+      console.log("Found email:", primaryEmail);
       
       // Check if user is admin in your database
       const adminUser = await UserAuthor.findOne({ email: primaryEmail, role: "admin" });
       
       if (!adminUser) {
+        console.log("Not an admin user");
         return res.status(403).json({ message: "Not authorized as admin" });
       }
       
-      // Add user email to request for later use
+      console.log("Admin verified");
+      
+      // Add user info to request for later use
       req.userEmail = primaryEmail;
+      req.userId = session.userId;
       
       // Proceed if user is admin
       next();
