@@ -8,15 +8,23 @@ const adminApp = require("./APIs/adminApi");
 const cors = require("cors");
 const port = process.env.PORT || 3000;
 
-// CORS Configuration for local development
+// Updated CORS Configuration to allow both local and deployed origins
 const corsOptions = {
-  origin: "http://localhost:5173", // Allow your local React app
+  origin: [
+    "http://localhost:5173",
+    "https://draft-blogapp.vercel.app",
+    // Add any other frontend domains that need access
+  ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
+  exposedHeaders: ['Access-Control-Allow-Origin']
 };
 
 app.use(cors(corsOptions));
+
+// Add preflight options handling for complex requests
+app.options('*', cors(corsOptions));
 
 // Body parser middleware
 app.use(exp.json());
