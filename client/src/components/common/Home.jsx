@@ -22,13 +22,23 @@ import {
 import { SiMongodb, SiExpress, SiTailwindcss } from "react-icons/si";
 import "../css/Home.css";
 
+// Create an axios instance with default settings
+const api = axios.create({
+  baseURL: "https://draft-blogapp-backend2.vercel.app",
+  withCredentials: true,
+  timeout: 10000, // 10 seconds timeout
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
 function Home() {
   const { currentUser, setCurrentUser } = useContext(userAuthorContextObj);
   const { isSignedIn, user, isLoaded } = useUser();
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isChecking, setIsChecking] = useState(true); // Added state for checking admin status
+  const [isChecking, setIsChecking] = useState(true);
   const navigate = useNavigate();
 
   const handleCopyEmail = () => {
@@ -47,32 +57,53 @@ function Home() {
     setIsSubmitting(true);
     
     const selectedRole = e.target.value;
-    const updatedUser = { ...currentUser, role: selectedRole };
+    
+    // Get existing clerk token if available
+    const clerkToken = await user?.getToken();
+    
+    const updatedUser = { 
+      ...currentUser, 
+      role: selectedRole,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.emailAddresses[0].emailAddress,
+      profileImageUrl: user.imageUrl
+    };
     
     try {
       let endpoint;
       
       if (selectedRole === "admin") {
-        endpoint = "https://draft-blogapp-backend2.vercel.app/admin-api/users-authors";
+        endpoint = "/admin-api/users-authors";
       } else if (selectedRole === "author") {
-        endpoint = "https://draft-blogapp-backend2.vercel.app/author-api/author";
+        endpoint = "/author-api/author";
       } else if (selectedRole === "user") {
-        endpoint = "https://draft-blogapp-backend2.vercel.app/user-api/user";
+        endpoint = "/user-api/user";
       }
       
-      const res = await axios.post(endpoint, updatedUser);
+      const res = await api.post(endpoint, updatedUser, {
+        headers: clerkToken ? { 'Authorization': `Bearer ${clerkToken}` } : {}
+      });
+      
       const { message, payload } = res.data;
       
       if (message === selectedRole) {
-        setCurrentUser({ ...currentUser, ...payload });
-        localStorage.setItem("currentuser", JSON.stringify(payload));
+        const userData = { ...currentUser, ...payload };
+        setCurrentUser(userData);
+        
+        // Save to localStorage with expiration time (1 hour)
+        const expiresAt = new Date().getTime() + (60 * 60 * 1000);
+        localStorage.setItem("currentuser", JSON.stringify({
+          ...userData,
+          expiresAt
+        }));
       } else {
         setError(message);
         resetRadioSelection();
       }
     } catch (err) {
       console.error("Role selection error:", err);
-      setError(err.message || "An error occurred. Please try again.");
+      setError(err.response?.data?.message || "An error occurred. Please try again.");
       resetRadioSelection();
     } finally {
       setIsSubmitting(false);
@@ -106,12 +137,26 @@ function Home() {
             ...userInfo
           });
           
+          // Get token from Clerk
+          const clerkToken = await user.getToken();
+          
+          if (!clerkToken) {
+            console.warn("No auth token available");
+            setIsChecking(false);
+            return;
+          }
+          
           // Check if user exists in the database and if they are an admin
-          const response = await axios.get(
-            `https://draft-blogapp-backend2.vercel.app/admin-api/check-admin?email=${userInfo.email}`
+          const response = await api.get(
+            `/admin-api/check-admin?email=${encodeURIComponent(userInfo.email)}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${clerkToken}`
+              }
+            }
           );
           
-          if (response.data.isAdmin) {
+          if (response.data && response.data.isAdmin) {
             // User is an admin, set the user in context and navigate
             const updatedUserInfo = {
               ...userInfo,
@@ -141,13 +186,35 @@ function Home() {
           }
         } catch (err) {
           console.error("Admin check error:", err);
-          // Clear any admin status if there was an error
-          const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
-          if (storedUser.role === 'admin') {
-            localStorage.setItem("currentuser", JSON.stringify({
-              ...storedUser,
+          
+          // If 401 or 404, it's likely the user isn't an admin
+          if (err.response && (err.response.status === 401 || err.response.status === 404)) {
+            console.log("User is not an admin or endpoint not available");
+            
+            // Set as regular user
+            const userInfo = {
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.emailAddresses[0].emailAddress,
+              profileImageUrl: user.imageUrl,
               role: 'user'
-            }));
+            };
+            
+            setCurrentUser({
+              ...currentUser,
+              ...userInfo
+            });
+            
+            localStorage.setItem("currentuser", JSON.stringify(userInfo));
+          } else {
+            // Clear any admin status if there was an error
+            const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
+            if (storedUser.role === 'admin') {
+              localStorage.setItem("currentuser", JSON.stringify({
+                ...storedUser,
+                role: 'user'
+              }));
+            }
           }
         } finally {
           setIsChecking(false);
@@ -158,6 +225,13 @@ function Home() {
         localStorage.removeItem("currentuser");
       }
     };
+    
+    // Check for token expiration
+    const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
+    if (storedUser.expiresAt && new Date().getTime() > storedUser.expiresAt) {
+      // Token expired, clear it
+      localStorage.removeItem("currentuser");
+    }
     
     checkAdminStatus();
   }, [isLoaded, isSignedIn, user]);

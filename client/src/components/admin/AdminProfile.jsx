@@ -4,6 +4,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { userAuthorContextObj } from "../../contexts/UserAuthorContext";
 import './AdminProfile.css'; // Import the CSS file
 
+// Create an axios instance with default settings
+const api = axios.create({
+  baseURL: "https://draft-blogapp-backend2.vercel.app",
+  withCredentials: true,
+  timeout: 10000, // 10 seconds timeout
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
 function AdminProfile() {
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState([]);
@@ -16,12 +26,25 @@ function AdminProfile() {
 
   useEffect(() => {
     // Check if user is logged in and is an admin
-    if (!currentUser || !currentUser.role || currentUser.role !== "admin") {
-      navigate("/");
-      return;
-    }
-
-    fetchUsers();
+    const checkAuth = async () => {
+      // Check for token expiration
+      const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
+      if (storedUser.expiresAt && new Date().getTime() > storedUser.expiresAt) {
+        // Token expired, clear it and redirect to home
+        localStorage.removeItem("currentuser");
+        navigate("/");
+        return;
+      }
+      
+      if (!currentUser || !currentUser.role || currentUser.role !== "admin") {
+        navigate("/");
+        return;
+      }
+      
+      fetchUsers();
+    };
+    
+    checkAuth();
   }, [currentUser, navigate]);
 
   const fetchUsers = async () => {
@@ -29,8 +52,21 @@ function AdminProfile() {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get("https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", {
-        withCredentials: true
+      // Get authentication token if available from clerk (if implemented)
+      let authHeader = {};
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
+        if (storedUser.token) {
+          authHeader = { 'Authorization': `Bearer ${storedUser.token}` };
+        }
+      } catch (err) {
+        console.warn("Error retrieving auth token", err);
+      }
+      
+      const response = await api.get("/admin-api/users-authors", {
+        headers: {
+          ...authHeader
+        }
       });
       
       console.log("Data received:", response.data);
@@ -49,29 +85,78 @@ function AdminProfile() {
       setLoading(false);
     } catch (err) {
       console.error("Error fetching users:", err);
-      if (err.response && err.response.status === 401) {
-        navigate("/");
+      
+      // Handle specific error codes
+      if (err.response) {
+        if (err.response.status === 401) {
+          setError("Authentication error: You don't have permission to access this resource.");
+          // Redirect to home after a delay
+          setTimeout(() => navigate("/"), 3000);
+        } else if (err.response.status === 404) {
+          setError("API endpoint not found. The server may be down or the endpoint has changed.");
+        } else {
+          setError("Failed to fetch users: " + (err.response?.data?.message || err.message));
+        }
+      } else if (err.request) {
+        // Request was made but no response received
+        setError("No response from server. Please check your internet connection.");
       } else {
-        setError("Failed to fetch users: " + (err.response?.data?.message || err.message));
-        setLoading(false);
+        setError("An unexpected error occurred: " + err.message);
       }
+      
+      setLoading(false);
     }
   };
 
   const updateStatus = async (userEmail, newActiveStatus) => {
     try {
-      const response = await axios.put(
-        `https://draft-blogapp-backend2.vercel.app/admin-api/update-status/${encodeURIComponent(userEmail)}`, 
+      setLoading(true);
+      
+      // Get authentication token if available
+      let authHeader = {};
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
+        if (storedUser.token) {
+          authHeader = { 'Authorization': `Bearer ${storedUser.token}` };
+        }
+      } catch (err) {
+        console.warn("Error retrieving auth token", err);
+      }
+      
+      const response = await api.put(
+        `/admin-api/update-status/${encodeURIComponent(userEmail)}`,
         { isActive: newActiveStatus },
-        { withCredentials: true }
+        {
+          headers: {
+            ...authHeader
+          }
+        }
       );
+      
+      // Show brief success message
+      setError(`User ${newActiveStatus ? 'enabled' : 'blocked'} successfully.`);
+      setTimeout(() => setError(null), 3000);
       
       // Refresh users after status change
       fetchUsers();
     } catch (error) {
       console.error("Error updating status:", error);
-      setError("Failed to update user status: " + (error.response?.data?.message || error.message));
+      
+      if (error.response && error.response.status === 401) {
+        setError("Authentication error: You don't have permission to update user status.");
+        setTimeout(() => navigate("/"), 3000);
+      } else {
+        setError("Failed to update user status: " + (error.response?.data?.message || error.message));
+      }
+      
+      setLoading(false);
     }
+  };
+
+  // Add retry functionality
+  const retryFetch = () => {
+    setError(null);
+    fetchUsers();
   };
 
   if (loading) {
@@ -104,11 +189,17 @@ function AdminProfile() {
         </div>
         
         {error && (
-          <div className="admin-error">
+          <div className={`admin-error ${error.includes('successfully') ? 'admin-success' : ''}`}>
             <svg className="admin-error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
+              {error.includes('successfully') ? (
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              ) : (
+                <>
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </>
+              )}
             </svg>
             <p className="admin-error-message">{error}</p>
             <button className="admin-error-close" onClick={() => setError(null)}>
@@ -146,7 +237,7 @@ function AdminProfile() {
         
         {/* Refresh Button */}
         <div className="admin-actions">
-          <button className="admin-refresh-button" onClick={fetchUsers} disabled={loading}>
+          <button className="admin-refresh-button" onClick={retryFetch} disabled={loading}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
             </svg>
@@ -206,10 +297,11 @@ function AdminProfile() {
                           <button
                             className="admin-action-button block"
                             onClick={() => updateStatus(user.email, false)}
+                            disabled={loading}
                           >
-                            <svg className="admin-action-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="5" y1="5" x2="19" y2="19" />
                             </svg>
                             Block
                           </button>
@@ -225,9 +317,7 @@ function AdminProfile() {
               {blockedUsers.length === 0 ? (
                 <div className="admin-empty-state">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                   <p>No blocked users found</p>
                 </div>
@@ -247,7 +337,7 @@ function AdminProfile() {
                       <tr key={user._id || user.email}>
                         <td>
                           <div className="admin-user">
-                            <div className="admin-user-avatar">
+                            <div className="admin-user-avatar blocked">
                               <svg className="admin-user-avatar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                 <circle cx="12" cy="7" r="4" />
@@ -272,9 +362,11 @@ function AdminProfile() {
                           <button
                             className="admin-action-button enable"
                             onClick={() => updateStatus(user.email, true)}
+                            disabled={loading}
                           >
-                            <svg className="admin-action-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12" />
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                              <polyline points="22 4 12 14.01 9 11.01" />
                             </svg>
                             Enable
                           </button>
