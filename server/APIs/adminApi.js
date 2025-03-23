@@ -2,28 +2,34 @@ const exp = require("express");
 const adminApp = exp.Router();
 const UserAuthor = require("../models/userAuthorModel");
 const expressAsyncHandler = require("express-async-handler");
-const { requireAuth, clerkMiddleware } = require("@clerk/express");
 require("dotenv").config();
 
 adminApp.use(exp.json());
 
-// Check if user is an admin
+// Check if user is an admin (keeping from second API but removing Clerk dependency)
 adminApp.post(
-  "/users-authors",
+  "/check-admin",
   expressAsyncHandler(async (req, res) => {
     try {
       const { email } = req.body;
-      // Check if user exists and is an admin
-      const adminUser = await UserAuthor.findOne({ email, role: "admin" });
       
-      if (!adminUser) {
-        return res.status(403).json({ message: "not admin" });
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
       }
       
-      // Return admin user data with active status
+      // Check if user exists
+      const user = await UserAuthor.findOne({ email });
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found", isAdmin: false });
+      }
+      
+      // Return user data with admin status
       return res.status(200).json({ 
-        message: "admin", 
-        payload: adminUser 
+        message: "Admin status checked",
+        isAdmin: user.role === 'admin',
+        userId: user._id,
+        role: user.role
       });
     } catch (error) {
       console.error("Admin verification error:", error);
@@ -32,34 +38,54 @@ adminApp.post(
   })
 );
 
-// Get all users and authors (requires authentication)
+// Get all users and authors (removing Clerk authentication)
 adminApp.get(
   "/users-authors",
-  requireAuth({ signInUrl: "unauthorized" }),
   expressAsyncHandler(async (req, res) => {
     try {
-      // Get clerk user ID from auth middleware
-      const clerkUserId = req.auth.userId;
+      // Optional: Add a simple authentication check using query parameter
+      const { email } = req.query;
       
-      // Verify this is an admin by checking the admin email in your database
-      // You would typically map the Clerk user ID to your application's user
+      if (email) {
+        // Verify this is an admin by checking the database
+        const adminUser = await UserAuthor.findOne({ email, role: "admin" });
+        
+        if (!adminUser) {
+          return res.status(403).json({ message: "Not authorized as admin" });
+        }
+      }
+      
       const users = await UserAuthor.find();
-      res.json(users);
+      res.status(200).json({ 
+        message: "Users fetched successfully", 
+        payload: users 
+      });
     } catch (error) {
       res.status(500).json({ message: "Error fetching users and authors", error: error.message });
     }
   })
 );
 
-// Enable or disable a user/author (requires authentication)
+// Enable or disable a user/author (removing Clerk authentication)
 adminApp.put(
   "/update-status/:email",
-  requireAuth({ signInUrl: "unauthorized" }),
   expressAsyncHandler(async (req, res) => {
     try {
       const { email } = req.params;
-      const { isActive } = req.body;
-
+      const { isActive, adminEmail } = req.body;
+      
+      if (typeof isActive !== 'boolean') {
+        return res.status(400).json({ message: "isActive must be a boolean value" });
+      }
+      
+      // Optional: Verify the requester is an admin
+      if (adminEmail) {
+        const adminUser = await UserAuthor.findOne({ email: adminEmail, role: "admin" });
+        if (!adminUser) {
+          return res.status(403).json({ message: "Not authorized as admin" });
+        }
+      }
+      
       const user = await UserAuthor.findOneAndUpdate(
         { email },
         { isActive },
@@ -70,19 +96,14 @@ adminApp.put(
         return res.status(404).json({ message: "User not found" });
       }
 
-      res.json({ 
-        message: `User ${isActive ? "enabled" : "disabled"} successfully`, 
-        user 
+      res.status(200).json({ 
+        message: `User ${isActive ? "activated" : "deactivated"} successfully`, 
+        payload: user 
       });
     } catch (error) {
       res.status(500).json({ message: "Error updating user status", error: error.message });
     }
   })
 );
-
-// Route to handle unauthorized access attempts
-adminApp.get("/unauthorized", (req, res) => {
-  res.status(401).json({ message: "Unauthorized request" });
-});
 
 module.exports = adminApp;
