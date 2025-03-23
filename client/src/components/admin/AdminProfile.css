@@ -352,3 +352,98 @@ input, select, button {
         margin-right: 0;
     }
 }
+
+
+/* Tab Navigation Styles */
+.admin-tabs {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--dark);
+  gap: 0.5rem;
+}
+
+.admin-tab {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--dark);
+  color: var(--light);
+  border: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-tab:hover {
+  background: rgba(22, 22, 24, 0.8);
+}
+
+.admin-tab.active {
+  background: var(--bg);
+  color: var(--text-pink);
+  border-bottom: 2px solid var(--text-pink);
+}
+
+.admin-tab-icon {
+  margin-right: 0.5rem;
+  stroke: currentColor;
+}
+
+.admin-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  background: var(--bg);
+  color: var(--light);
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  min-width: 1.5rem;
+}
+
+.admin-tab.active .admin-tab-count {
+  background: var(--text-pink);
+  color: var(--dark);
+}
+
+/* Action Button Styles */
+.admin-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.admin-refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: var(--light);
+  border: 1px solid var(--light);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-refresh-button:hover {
+  background: rgba(235, 235, 245, 0.1);
+}
+
+.admin-refresh-button:active {
+  transform: scale(0.98);
+}
+
+.admin-refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-refresh-button svg {
+  stroke: currentColor;
+}

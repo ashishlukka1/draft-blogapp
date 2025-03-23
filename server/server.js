@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 // CORS Configuration for local development
 const corsOptions = {
-  origin: "https://draft-blogapp.vercel.app", // Allow your local React app
+  origin: "http://localhost:5173", // Allow your local React app
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
