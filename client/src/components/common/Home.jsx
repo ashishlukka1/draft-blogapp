@@ -3,6 +3,7 @@ import { userAuthorContextObj } from "../../contexts/UserAuthorContext";
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { Palette, Layout, Mouse } from "lucide-react";
+import image from "../../assets/1.jpeg";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 import { SiClerk } from "react-icons/si";
 import { FaGithub } from "react-icons/fa";
@@ -17,28 +18,16 @@ import {
   FaBook,
   FaUsers,
   FaShieldAlt,
-  FaSpinner,
 } from "react-icons/fa";
 import { SiMongodb, SiExpress, SiTailwindcss } from "react-icons/si";
 import "../css/Home.css";
-
-// Create an axios instance with default settings
-const api = axios.create({
-  baseURL: "https://draft-blogapp-backend2.vercel.app",
-  withCredentials: true,
-  timeout: 10000, // 10 seconds timeout
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
 
 function Home() {
   const { currentUser, setCurrentUser } = useContext(userAuthorContextObj);
   const { isSignedIn, user, isLoaded } = useUser();
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
+  const [processingRole, setProcessingRole] = useState(false);
   const navigate = useNavigate();
 
   const handleCopyEmail = () => {
@@ -48,65 +37,81 @@ function Home() {
   };
 
   async function onSelectRole(e) {
-    // Check if user is inactive first
-    if (currentUser && currentUser.isActive === false) {
-      return; // Don't proceed if user is inactive
-    }
-    
     setError("");
-    setIsSubmitting(true);
-    
+    setProcessingRole(true);
     const selectedRole = e.target.value;
-    
-    // Get existing clerk token if available
-    const clerkToken = await user?.getToken();
-    
-    const updatedUser = { 
-      ...currentUser, 
-      role: selectedRole,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.emailAddresses[0].emailAddress,
-      profileImageUrl: user.imageUrl
-    };
+    let tempUser = { ...currentUser, role: selectedRole };
+    console.log("Selected role:", selectedRole);
     
     try {
-      let endpoint;
-      
       if (selectedRole === "admin") {
-        endpoint = "/admin-api/users-authors";
-      } else if (selectedRole === "author") {
-        endpoint = "/author-api/author";
-      } else if (selectedRole === "user") {
-        endpoint = "/user-api/user";
-      }
-      
-      const res = await api.post(endpoint, updatedUser, {
-        headers: clerkToken ? { 'Authorization': `Bearer ${clerkToken}` } : {}
-      });
-      
-      const { message, payload } = res.data;
-      
-      if (message === selectedRole) {
-        const userData = { ...currentUser, ...payload };
-        setCurrentUser(userData);
+        // Check admin access first
+        const res = await axios.post(
+          `http://localhost:3000/admin-api/users-authors`,
+          tempUser
+        );
+        const { message, payload } = res.data;
         
-        // Save to localStorage with expiration time (1 hour)
-        const expiresAt = new Date().getTime() + (60 * 60 * 1000);
-        localStorage.setItem("currentuser", JSON.stringify({
-          ...userData,
-          expiresAt
-        }));
-      } else {
-        setError(message);
-        resetRadioSelection();
+        if (message === "admin") {
+          setCurrentUser({ ...tempUser, ...payload });
+          localStorage.setItem("currentuser", JSON.stringify(payload));
+        } else {
+          setError("Invalid role. You don't have admin privileges.");
+          resetRadioSelection();
+        }
+      }
+      else if (selectedRole === "author") {
+        const res = await axios.post(
+          "http://localhost:3000/author-api/author",
+          tempUser
+        );
+        const { message, payload } = res.data;
+        
+        if (message === "author") {
+          // Check if account is active
+          if (!payload.isActive) {
+            setError("Your author account is blocked. Please contact admin for assistance.");
+            resetRadioSelection();
+          } else {
+            setCurrentUser({ ...tempUser, ...payload });
+            localStorage.setItem("currentuser", JSON.stringify(payload));
+          }
+        } else {
+          setError("Invalid role. You don't have author privileges.");
+          resetRadioSelection();
+        }
+      }
+      else if (selectedRole === "user") {
+        const res = await axios.post(
+          `http://localhost:3000/user-api/user`,
+          tempUser
+        );
+        const { message, payload } = res.data;
+        
+        if (message === "user") {
+          // Check if account is active
+          if (!payload.isActive) {
+            setError("Your account is blocked. Please contact admin for assistance.");
+            resetRadioSelection();
+          } else {
+            setCurrentUser({ ...tempUser, ...payload });
+            localStorage.setItem("currentuser", JSON.stringify(payload));
+          }
+        } else {
+          setError("Invalid role. You don't have user privileges.");
+          resetRadioSelection();
+        }
       }
     } catch (err) {
       console.error("Role selection error:", err);
-      setError(err.response?.data?.message || "An error occurred. Please try again.");
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError(err.message || "An error occurred. Please try again.");
+      }
       resetRadioSelection();
     } finally {
-      setIsSubmitting(false);
+      setProcessingRole(false);
     }
   }
 
@@ -118,139 +123,37 @@ function Home() {
     });
   };
 
-  // Check if the user is an admin
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (isSignedIn && user) {
-        setIsChecking(true);
-        try {
-          // First set the basic user info
-          const userInfo = {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.emailAddresses[0].emailAddress,
-            profileImageUrl: user.imageUrl,
-          };
-          
-          setCurrentUser({
-            ...currentUser,
-            ...userInfo
-          });
-          
-          // Get token from Clerk
-          const clerkToken = await user.getToken();
-          
-          if (!clerkToken) {
-            console.warn("No auth token available");
-            setIsChecking(false);
-            return;
-          }
-          
-          // Check if user exists in the database and if they are an admin
-          const response = await api.get(
-            `/admin-api/check-admin?email=${encodeURIComponent(userInfo.email)}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${clerkToken}`
-              }
-            }
-          );
-          
-          if (response.data && response.data.isAdmin) {
-            // User is an admin, set the user in context and navigate
-            const updatedUserInfo = {
-              ...userInfo,
-              role: response.data.role,
-              userId: response.data.userId
-            };
-            
-            setCurrentUser({
-              ...currentUser,
-              ...updatedUserInfo
-            });
-            
-            // Save to localStorage with expiration time (e.g., 1 hour)
-            const expiresAt = new Date().getTime() + (60 * 60 * 1000);
-            localStorage.setItem("currentuser", JSON.stringify({
-              ...updatedUserInfo,
-              expiresAt
-            }));
-            
-            navigate('/admin-profile/' + userInfo.email);
-          } else {
-            // User exists but is not an admin
-            localStorage.setItem("currentuser", JSON.stringify({
-              ...userInfo,
-              role: 'user'
-            }));
-          }
-        } catch (err) {
-          console.error("Admin check error:", err);
-          
-          // If 401 or 404, it's likely the user isn't an admin
-          if (err.response && (err.response.status === 401 || err.response.status === 404)) {
-            console.log("User is not an admin or endpoint not available");
-            
-            // Set as regular user
-            const userInfo = {
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.emailAddresses[0].emailAddress,
-              profileImageUrl: user.imageUrl,
-              role: 'user'
-            };
-            
-            setCurrentUser({
-              ...currentUser,
-              ...userInfo
-            });
-            
-            localStorage.setItem("currentuser", JSON.stringify(userInfo));
-          } else {
-            // Clear any admin status if there was an error
-            const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
-            if (storedUser.role === 'admin') {
-              localStorage.setItem("currentuser", JSON.stringify({
-                ...storedUser,
-                role: 'user'
-              }));
-            }
-          }
-        } finally {
-          setIsChecking(false);
-        }
-      } else if (isLoaded && !isSignedIn) {
-        setIsChecking(false);
-        // Clear user data when signed out
-        localStorage.removeItem("currentuser");
-      }
-    };
-    
-    // Check for token expiration
-    const storedUser = JSON.parse(localStorage.getItem("currentuser") || "{}");
-    if (storedUser.expiresAt && new Date().getTime() > storedUser.expiresAt) {
-      // Token expired, clear it
-      localStorage.removeItem("currentuser");
+    if (isSignedIn === true) {
+      // Reset user state when logged in
+      setCurrentUser({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.emailAddresses[0].emailAddress,
+        profileImageUrl: user.imageUrl,
+        // Do not set role here, let the user choose
+      });
+      
+      // Clear any previous errors
+      setError("");
+      resetRadioSelection();
     }
-    
-    checkAdminStatus();
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn]);
 
   useEffect(() => {
-    // Don't navigate if user is inactive
-    if (currentUser?.isActive === false) {
-      return;
+    // Only navigate when there's a valid role and no error
+    if (!processingRole && error === "" && currentUser?.role) {
+      if (currentUser.role === "user") {
+        navigate(`/user-profile/${currentUser.email}`);
+      }
+      else if (currentUser.role === "author") {
+        navigate(`/author-profile/${currentUser.email}`);
+      }
+      else if (currentUser.role === "admin") {
+        navigate(`/admin-profile/${currentUser.email}`);
+      }
     }
-    
-    // Check various roles and navigate
-    if (currentUser?.role === "admin" && error.length === 0) {
-      navigate(`/admin-profile/${currentUser.email}`);
-    } else if (currentUser?.role === "user" && error.length === 0) {
-      navigate(`/user-profile/${currentUser.email}`);
-    } else if (currentUser?.role === "author" && error.length === 0) {
-      navigate(`/author-profile/${currentUser.email}`);
-    }
-  }, [currentUser, error]);
+  }, [currentUser, processingRole, error, navigate]);
 
   return (
     <div className="home-container">
@@ -380,9 +283,13 @@ function Home() {
                 <span>Clerk</span>
               </div>
               <div className="tech-item">
-                <FaGithub />
+                  <FaGithub />
                 <span>GitHub</span>
               </div>
+              {/* <div className="tech-item">
+                <SiTailwindcss />
+                <span>Tailwind</span>
+              </div> */}
             </div>
           </div>
 
@@ -400,17 +307,7 @@ function Home() {
         </div>
       )}
 
-      {/* Show loader while checking admin status */}
-      {isSignedIn === true && isChecking && (
-        <div className="loader-container">
-          <div className="spinner-container text-center">
-            <FaSpinner className="spinner-icon" />
-            <p className="spinner-text mt-2">Checking user status...</p>
-          </div>
-        </div>
-      )}
-
-      {isSignedIn === true && !isChecking && (
+      {isSignedIn === true && (
         <div className="user-section">
           <div className="profile-card">
             <div className="profile-header">
@@ -420,87 +317,74 @@ function Home() {
                 alt="Profile"
               />
               <div className="profile-info">
-                <h2 className="display-6">{user.firstName} {user.lastName}</h2>
+                <h2 className="display-6">{user.firstName}</h2>
                 <p className="email">{user.emailAddresses[0].emailAddress}</p>
               </div>
             </div>
 
             <div className="role-selection">
               <h3 className="text-center mb-4">Select Your Role</h3>
-              
-              {error && (
+              {error.length !== 0 && (
                 <div className="alert alert-danger" role="alert">
                   {error}
                 </div>
               )}
-              
-              {currentUser && currentUser.isActive === false ? (
-                <div className="alert alert-danger" role="alert">
-                  <h4 className="alert-heading">Account Temporarily Blocked</h4>
-                  <p>Your account has been temporarily blocked by an admin. Please contact the administrator for assistance.</p>
-                  <hr />
-                  <p className="mb-0">Email: support@inkspire.com</p>
+              {processingRole && (
+                <div className="text-center mb-3">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
                 </div>
-              ) : (
-                <div className="role-options">
-                  <div className="role-card">
-                    <input
-                      type="radio"
-                      name="role"
-                      id="admin"
-                      value="admin"
-                      className="role-input"
-                      onChange={onSelectRole}
-                      disabled={isSubmitting}
-                    />
-                    <label htmlFor="admin" className="role-label">
-                      <FaShieldAlt className="role-icon" />
-                      <span>Admin</span>
-                    </label>
-                  </div>
-                  
-                  <div className="role-card">
-                    <input
-                      type="radio"
-                      name="role"
-                      id="author"
-                      value="author"
-                      className="role-input"
-                      onChange={onSelectRole}
-                      disabled={isSubmitting}
-                    />
-                    <label htmlFor="author" className="role-label">
-                      <FaUserEdit className="role-icon" />
-                      <span>Author</span>
-                    </label>
-                  </div>
+              )}
+              <div className="role-options">
+                <div className="role-card">
+                  <input
+                    type="radio"
+                    name="role"
+                    id="admin"
+                    value="admin"
+                    className="role-input"
+                    onChange={onSelectRole}
+                    disabled={processingRole}
+                  />
+                  <label htmlFor="admin" className="role-label">
+                    <FaShieldAlt className="role-icon" />
+                    <span>Admin</span>
+                  </label>
+                </div>
+                
+                <div className="role-card">
+                  <input
+                    type="radio"
+                    name="role"
+                    id="author"
+                    value="author"
+                    className="role-input"
+                    onChange={onSelectRole}
+                    disabled={processingRole}
+                  />
+                  <label htmlFor="author" className="role-label">
+                    <FaUserEdit className="role-icon" />
+                    <span>Author</span>
+                  </label>
+                </div>
 
-                  <div className="role-card">
-                    <input
-                      type="radio"
-                      name="role"
-                      id="user"
-                      value="user"
-                      className="role-input"
-                      onChange={onSelectRole}
-                      disabled={isSubmitting}
-                    />
-                    <label htmlFor="user" className="role-label">
-                      <FaUserAstronaut className="role-icon" />
-                      <span>Reader</span>
-                    </label>
-                  </div>
+                <div className="role-card">
+                  <input
+                    type="radio"
+                    name="role"
+                    id="user"
+                    value="user"
+                    className="role-input"
+                    onChange={onSelectRole}
+                    disabled={processingRole}
+                  />
+                  <label htmlFor="user" className="role-label">
+                    <FaUserAstronaut className="role-icon" />
+                    <span>Reader</span>
+                  </label>
                 </div>
-              )}
-              
-              {isSubmitting && (
-                <div className="text-center mt-4">
-                  <div className="spinner-container">
-                    <FaSpinner className="spinner-icon" />
-                    <p className="spinner-text mt-2">Processing your selection...</p>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
