@@ -32,7 +32,7 @@ Draft is a full-featured blog application built with the MERN stack (MongoDB, Ex
 - **Database**: MongoDB
 - **Authentication**: Clerk
 - **Deployment**: 
-  - Frontend: Netlify
+  - Frontend: Vercel
   - Backend: Render
 
 ## Responsive Design
