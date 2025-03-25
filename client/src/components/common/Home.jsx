@@ -47,7 +47,7 @@ function Home() {
       if (selectedRole === "admin") {
         // Check admin access first
         const res = await axios.post(
-          `https://draft-blogapp-backend2.vercel.app/admin-api/users-authors`,
+          `https://draft-blogapp.onrender.com/admin-api/users-authors`,
           tempUser
         );
         const { message, payload } = res.data;
@@ -62,7 +62,7 @@ function Home() {
       }
       else if (selectedRole === "author") {
         const res = await axios.post(
-          "https://draft-blogapp-backend2.vercel.app/author-api/author",
+          "https://draft-blogapp.onrender.com/author-api/author",
           tempUser
         );
         const { message, payload } = res.data;
@@ -83,7 +83,7 @@ function Home() {
       }
       else if (selectedRole === "user") {
         const res = await axios.post(
-          `https://draft-blogapp-backend2.vercel.app/user-api/user`,
+          `https://draft-blogapp.onrender.com/user-api/user`,
           tempUser
         );
         const { message, payload } = res.data;

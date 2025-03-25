@@ -49,7 +49,7 @@ function PostArticle() {
       articleObj.comments = [];
       articleObj.isArticleActive = true; // Fixed property name to match original code
 
-      let res = await axios.post('https://draft-blogapp-backend2.vercel.app/author-api/article', articleObj);
+      let res = await axios.post('https://draft-blogapp.onrender.com/author-api/article', articleObj);
       if (res.status === 201) {
         navigate(`/author-profile/${currentUser.email}/articles`);
       }

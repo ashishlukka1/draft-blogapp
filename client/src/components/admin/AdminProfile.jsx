@@ -21,12 +21,13 @@ function AdminProfile() {
 
     setLoading(true);
     
-    axios.get("https://draft-blogapp-backend2.vercel.app/admin-api/users-authors", {
+    axios.get("https://draft-blogapp.onrender.com/admin-api/users-authors", {
       withCredentials: true
     })
       .then(response => {
         console.log("Data received:", response.data);
-        setUsers(response.data);
+        // Store just the payload array that contains users
+        setUsers(response.data.payload || []);
         setLoading(false);
       })
       .catch(err => {
@@ -41,13 +42,17 @@ function AdminProfile() {
   }, [currentUser, navigate]);
 
   const updateStatus = (email, isActive) => {
-    axios.put(`https://draft-blogapp-backend2.vercel.app/admin-api/update-status/${email}`, 
-      { isActive },
+    axios.put(`https://draft-blogapp.onrender.com/admin-api/update-status/${email}`, 
+      { 
+        isActive,
+        adminEmail: currentUser.email // Send admin email for verification
+      },
       { withCredentials: true }
     )
       .then(response => {
+        // Update the user in the local state
         setUsers(users.map(user => 
-          user.email === email ? response.data.user : user
+          user.email === email ? response.data.payload : user
         ));
       })
       .catch(error => {
@@ -113,18 +118,26 @@ function AdminProfile() {
                   <tr key={user._id || user.email}>
                     <td>
                       <div className="admin-user">
-                        <div className="admin-user-avatar">
-                          <svg className="admin-user-avatar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                          </svg>
-                        </div>
+                        {/* <div className="admin-user-avatar">
+                          {user.profileImageUrl ? (
+                            <img 
+                              src={user.profileImageUrl} 
+                              alt={`${user.firstName} ${user.lastName}`}
+                              className="admin-user-avatar-img" 
+                            />
+                          ) : (
+                            <svg className="admin-user-avatar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                              <circle cx="12" cy="7" r="4" />
+                            </svg>
+                          )}
+                        </div> */}
                         <span className="admin-user-name">{user.firstName} {user.lastName}</span>
                       </div>
                     </td>
                     <td className="admin-user-email">{user.email}</td>
                     <td>
-                      <span className={`admin-role-badge ${user.role === "admin" ? "admin" : "user"}`}>
+                      <span className={`admin-role-badge ${user.role}`}>
                         {user.role}
                       </span>
                     </td>

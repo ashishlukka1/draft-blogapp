@@ -6,6 +6,41 @@ require("dotenv").config();
 
 adminApp.use(exp.json());
 
+// POST endpoint for user-authors that matches the client-side call
+adminApp.post(
+  "/users-authors",
+  expressAsyncHandler(async (req, res) => {
+    try {
+      const userData = req.body;
+      
+      // Verify this is an admin by checking email in database
+      const adminUser = await UserAuthor.findOne({ 
+        email: userData.email, 
+        role: "admin" 
+      });
+      
+      if (!adminUser) {
+        return res.status(403).json({ message: "Not authorized as admin" });
+      }
+      
+      // If admin exists and is active, send back user data
+      if (adminUser.isActive) {
+        return res.status(200).json({ 
+          message: "admin", 
+          payload: adminUser 
+        });
+      } else {
+        return res.status(403).json({ 
+          message: "Your admin account is blocked. Please contact support for assistance." 
+        });
+      }
+    } catch (error) {
+      console.error("Admin verification error:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  })
+);
+
 // Check if user is an admin (keeping from second API but removing Clerk dependency)
 adminApp.post(
   "/check-admin",

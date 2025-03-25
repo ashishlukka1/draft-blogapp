@@ -37,14 +37,14 @@
             };
 
             // Try to verify as author first
-            let response = await axios.post('https://draft-blogapp-backend2.vercel.app/author-api/author', userData, {
+            let response = await axios.post('https://draft-blogapp.onrender.com/author-api/author', userData, {
               headers: { Authorization: `Bearer ${token}` }
             });
 
             // If not an author, try as user
             if (response.data.message === "Invalid role") {
               userData.role = 'user';
-              response = await axios.post('https://draft-blogapp-backend2.vercel.app/user-api/user', userData, {
+              response = await axios.post('https://draft-blogapp.onrender.com/user-api/user', userData, {
                 headers: { Authorization: `Bearer ${token}` }
               });
             }
@@ -63,7 +63,7 @@
     async function getArticles() {
       try {
         const token = await getToken();
-        const res = await axios.get('https://draft-blogapp-backend2.vercel.app/author-api/articles', {
+        const res = await axios.get('https://draft-blogapp.onrender.com/author-api/articles', {
           headers: {
             Authorization: `Bearer ${token}`
           }
