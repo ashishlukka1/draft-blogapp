@@ -46,8 +46,6 @@ The application is fully responsive with a clean, modern UI that works seamlessl
 - Clerk Authentication
 - Bootstrap
 - Custom CSS
-- Netlify
-- Render
 
 ## Contact
 For support or inquiries, please contact [ashishlukka2005@gmail.com]
